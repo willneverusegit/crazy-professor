@@ -1,0 +1,12 @@
+# Retired provocation words
+# Format: one word per line. Comments start with #.
+#
+# Words land here when they have produced output in 3 invocations and the
+# user flagged all 3 as "too close to variations of previous outputs"
+# (column "retire?" in field-notes.md).
+#
+# Words in this file are excluded from the random pick in the skill.
+# Do not delete words from here -- they are the pool's memory.
+#
+# Initially empty. First retirements happen after 3+ flagged invocations
+# sharing the same word.
