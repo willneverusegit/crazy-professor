@@ -21,6 +21,16 @@ claude plugin install crazy-professor --scope user
 
 ## Trigger
 
+### Slash command
+
+```
+/crazy <topic>
+```
+
+Runs the divergence generator on `<topic>`. If no topic is given, it uses whatever the conversation was just about.
+
+### Trigger phrases
+
 - "crazy professor"
 - "provoke me"
 - "break my thinking"

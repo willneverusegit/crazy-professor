@@ -1,5 +1,5 @@
 {
   "name": "crazy-professor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Divergence generator for creative ideation. A deliberately unhinged thinker in three voices (first-principles-jester, labyrinth-librarian, systems-alchemist) that produces 10 provocations per call, never advice. V1 local-only; telegram bridge is explicitly out of scope."
 }
