@@ -3,17 +3,21 @@ name: crazy-professor
 description: >
   Divergence generator. Produces 10 unhinged provocations for any topic
   using random archetype + random provocation word + random PO operator
-  (De Bono's Provocation Operation). Output is never advice, always a
-  deliberately strange nudge away from the obvious. Use when feeling stuck,
-  when the first idea feels too normal, when a feature needs a weirder
-  starting point, when a brainstorm needs a destabilizer, or when a plan
-  feels like it converged too fast. Trigger phrases: "crazy professor",
-  "provoke me", "break my thinking", "give me weird ideas", "divergence",
-  "shake this up", "destabilize", "unstick me", "too normal", "weirder
-  starting point", "unhinged thinker", "nudge away from obvious".
+  (De Bono's Provocation Operation). Four voices: first-principles-jester,
+  labyrinth-librarian, systems-alchemist, radagast-brown (a warm, forest-
+  dwelling caretaker archetype that asks what needs shelter rather than
+  optimization). Output is never advice, always a deliberately strange
+  nudge away from the obvious. Use when feeling stuck, when the first
+  idea feels too normal, when a feature needs a weirder starting point,
+  when a brainstorm needs a destabilizer, or when a plan feels like it
+  converged too fast. Trigger phrases: "crazy professor", "provoke me",
+  "break my thinking", "give me weird ideas", "divergence", "shake this
+  up", "destabilize", "unstick me", "too normal", "weirder starting
+  point", "unhinged thinker", "nudge away from obvious", "radagast",
+  "radagast der braune", "cozy provocation", "gentler nudge", "waldhaft".
 metadata:
   author: domes
-  version: '0.1.0'
+  version: '0.3.0'
   part-of: crazy-professor
   layer: divergence
   status: V1 local-only
@@ -60,8 +64,9 @@ These are documented as future extensions below, not built.
 
 On each call, the skill:
 
-1. Picks **one of three archetypes** (deterministic from timestamp seed):
-   `first-principles-jester`, `labyrinth-librarian`, `systems-alchemist`.
+1. Picks **one of four archetypes** (deterministic from timestamp seed):
+   `first-principles-jester`, `labyrinth-librarian`, `systems-alchemist`,
+   `radagast-brown`.
 2. Picks **one provocation word** from `resources/provocation-words.txt`.
 3. Picks **one De Bono PO-operator**: `reversal`, `exaggeration`, or `escape`.
 4. Produces **exactly 10 provocations** to the user's topic, anchored in
@@ -105,10 +110,12 @@ percentage points on knowledge-heavy tasks (see Search Engine Journal,
 | `first-principles-jester` | Illegalizes conventions. Breaks down a habit into atoms, declares one atom illegal, rebuilds. | Naive, playful, never cynical. |
 | `labyrinth-librarian` | Imports mechanisms from distant fields. Opens in mykology/meteorology/ornithology/architecture, translates the mechanism back. | Quiet, learned, never pedantic. |
 | `systems-alchemist` | Rewires flows. Maps the topic as input/output/overflow/leak/wall and re-routes one element. | Precise, observational, like a process engineer drawing a flow diagram. |
+| `radagast-brown` | Protects the useful-uselessness. Asks what needs care, shelter, slowness -- defends a part of the system against optimization. | Softly distracted but never dumb. Speaks in living creatures and natural time (seasons, weather, dusk). |
 
 See `prompt-templates/first-principles-jester.md`,
 `prompt-templates/labyrinth-librarian.md`,
-`prompt-templates/systems-alchemist.md` for the full voice rules and
+`prompt-templates/systems-alchemist.md`,
+`prompt-templates/radagast-brown.md` for the full voice rules and
 verbotenes Vokabular of each.
 
 ## Operating Instructions (Claude follows this on invocation)
@@ -118,8 +125,11 @@ empty, ambiguous, or meta ("tell me a story", "how does this skill work"),
 ask one clarifying question and stop -- do not fabricate a topic.
 
 **Step 2: Pick stochastic elements.**
-- Archetype: take current UTC timestamp minute mod 3 (0=jester, 1=librarian,
-  2=alchemist). This is deterministic-within-minute, random-across-minutes.
+- Archetype: take current UTC timestamp minute mod 4 (0=jester, 1=librarian,
+  2=alchemist, 3=radagast-brown). This is deterministic-within-minute,
+  random-across-minutes. NOTE: radagast-brown is latent until the
+  Radagast-Activation Gate (see below) is passed -- until then, treat
+  mod-4 result 3 as a re-roll to mod-3.
 - Provocation word: pick one random line from `resources/provocation-words.txt`.
   Filter out any word that also appears in `resources/retired-words.txt`.
 - PO-operator: take timestamp second mod 3 (0=reversal, 1=exaggeration,
@@ -168,6 +178,24 @@ stays visible rather than being papered over with a bad tool.
 This is the Codex-review addition: **adoption is the risk, not build.**
 The skill earns its continued existence through use, not through existence.
 
+## Radagast-Activation Gate
+
+`radagast-brown` is built and present in the repo, but stays **latent**
+until Review 1 (2026-04-29) confirms the three original V1 archetypes
+earned at least their minimum keeper-count in the Feldtest. Until then,
+the stochastic picker treats timestamp-mod-4 result `3` as a re-roll to
+mod-3 (so jester/librarian/alchemist split the probability space).
+
+If Review 1 fails the museum pre-check (< 3 keepers across the first
+runs), `radagast-brown.md` stays in the repo as an unused asset but is
+not added to the active pool. Rationale: adding breadth to a skill that
+has not yet earned depth is the exact adoption-is-the-risk pattern the
+museum clause was written to prevent.
+
+On Review 1 success, the re-roll rule is removed from Step 2 and mod-4
+becomes live. This is a one-line change in this file and requires a
+version-bump commit.
+
 ## Future Behavior (deliberately out of scope for V1)
 
 The following are documented to preserve design intent and prevent
@@ -176,9 +204,11 @@ ad-hoc reimplementation. None of them are built in V1.
 ### V1.1 Candidates
 
 - **stage-magician** archetype. Purpose: sensory/dramaturgic
-  provocations using stage, prop, reveal, audience, timing. Opens a
-  fourth axis (sensory/bodily) that the three current archetypes do
-  not cover well. Parked because three stable voices ship first.
+  provocations using stage, prop, reveal, audience, timing. Originally
+  tagged as the V1.1 sensory slot. **Parked in v0.3.0** because
+  `radagast-brown` took the adjacent slot (biosphere/care axis)
+  first; dramaturgic/sensory stays open for V1.2 if Radagast proves
+  itself but a further distinct voice is still missing.
 
 ### V2 Extensions
 
@@ -213,7 +243,8 @@ crazy-professor/                              (repo root = plugin root)
         |-- prompt-templates/
         |   |-- first-principles-jester.md
         |   |-- labyrinth-librarian.md
-        |   \-- systems-alchemist.md
+        |   |-- systems-alchemist.md
+        |   \-- radagast-brown.md
         \-- resources/
             |-- provocation-words.txt         (100 curated words)
             |-- retired-words.txt             (starts empty)

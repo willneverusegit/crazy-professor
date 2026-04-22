@@ -1,5 +1,5 @@
 {
   "name": "crazy-professor",
-  "version": "0.2.0",
-  "description": "Divergence generator for creative ideation. A deliberately unhinged thinker in three voices (first-principles-jester, labyrinth-librarian, systems-alchemist) that produces 10 provocations per call, never advice. V1 local-only; telegram bridge is explicitly out of scope."
+  "version": "0.3.0",
+  "description": "Divergence generator for creative ideation. A deliberately unhinged thinker in four voices (first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown — the latter a warm, forest-dwelling caretaker who defends the useful-uselessness; latent until Review 1 on 2026-04-29) that produces 10 provocations per call, never advice. V1 local-only; telegram bridge is explicitly out of scope."
 }

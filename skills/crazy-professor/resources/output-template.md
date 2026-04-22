@@ -11,7 +11,7 @@ skill: crazy-professor
 version: 0.1.0
 timestamp: <ISO-8601 UTC, e.g. 2026-04-22T06:30:00Z>
 topic: "<user input, one line, unmodified>"
-archetype: <first-principles-jester | labyrinth-librarian | systems-alchemist>
+archetype: <first-principles-jester | labyrinth-librarian | systems-alchemist | radagast-brown>
 provocation_word: <single lowercase word>
 po_operator: <reversal | exaggeration | escape>
 ---
