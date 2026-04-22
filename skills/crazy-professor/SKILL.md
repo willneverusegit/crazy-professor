@@ -118,6 +118,12 @@ See `prompt-templates/first-principles-jester.md`,
 `prompt-templates/radagast-brown.md` for the full voice rules and
 verbotenes Vokabular of each.
 
+For functional guidance on **which archetype to pick deliberately**
+(instead of letting mod-4 decide) and an optional four-phase sequence
+(`Jester -> Librarian -> Alchemist -> Radagast`), see
+`docs/USAGE-PATTERNS.md`. That document is a user heuristic, not a
+skill rule — the skill itself stays a single-shot randomized picker.
+
 ## Operating Instructions (Claude follows this on invocation)
 
 **Step 1: Parse the topic.** Strip to a single sentence. If the input is
