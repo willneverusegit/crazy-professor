@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "crazy-professor-marketplace",
+  "description": "Marketplace for the crazy-professor divergence generator plugin",
+  "owner": {
+    "name": "willneverusegit",
+    "url": "https://github.com/willneverusegit"
+  },
+  "plugins": [
+    {
+      "name": "crazy-professor",
+      "description": "Divergence generator for creative ideation. Three voices (first-principles-jester, labyrinth-librarian, systems-alchemist) produce 10 provocations per call, never advice.",
+      "category": "creativity",
+      "source": {
+        "source": "github",
+        "repo": "willneverusegit/crazy-professor",
+        "path": "crazy-professor"
+      }
+    }
+  ]
+}
