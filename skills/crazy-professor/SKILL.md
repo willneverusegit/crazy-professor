@@ -201,9 +201,12 @@ ad-hoc reimplementation. None of them are built in V1.
 ## File Layout
 
 ```
-crazy-professor/
+crazy-professor/                              (repo root = plugin root)
 |-- .claude-plugin/
+|   |-- marketplace.json
 |   \-- plugin.json
+|-- commands/
+|   \-- crazy.md                              (/crazy slash command)
 \-- skills/
     \-- crazy-professor/
         |-- SKILL.md                          (this file)

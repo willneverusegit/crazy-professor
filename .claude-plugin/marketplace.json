@@ -14,7 +14,7 @@
       "source": {
         "source": "github",
         "repo": "willneverusegit/crazy-professor",
-        "path": "crazy-professor"
+        "path": "."
       }
     }
   ]
