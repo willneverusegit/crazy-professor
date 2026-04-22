@@ -11,13 +11,13 @@ description: >
   "provoke me", "break my thinking", "give me weird ideas", "divergence",
   "shake this up", "destabilize", "unstick me", "too normal", "weirder
   starting point", "unhinged thinker", "nudge away from obvious".
-user_invocable: true
 metadata:
   author: domes
   version: '0.1.0'
   part-of: crazy-professor
   layer: divergence
   status: V1 local-only
+  user_invocable: true
 ---
 
 # Crazy Professor
