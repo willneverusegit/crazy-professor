@@ -33,7 +33,7 @@ metadata:
 
 Divergence generator for creative ideation. Not an advisor. Not a coach.
 A deliberately unhinged thinker whose only job is to produce strange but
-anchored provocations that you would not have come to on your own.
+anchored provocations the user would not have reached on their own.
 
 ## German Trigger Phrases (body-level, not in frontmatter)
 
@@ -46,8 +46,8 @@ aus der spur", "gib mir wilde ideen", "steck mich fest", "ideen
 ausbrechen", "wilde provokationen", "das ist zu normal", "brauche was
 verdrehtes", "zu gerade gedacht", "stoss mich an".
 
-Claude Code: if the user types any of the above in German, invoke this
-skill the same way as for the English triggers.
+For German trigger phrases, invoke this skill the same way as for the
+English triggers.
 
 ## V1 Behavior (local burst) — default mode
 
@@ -76,8 +76,8 @@ Skill crazy-professor "<topic>" --chat
 ```
 
 Four archetypes run in a 3-round sequence, producing a curated 20-idea
-output (5 per archetype). See `docs/chat-mode-flow.md` for the
-authoritative flow specification.
+output (5 per archetype). See `references/chat-mode-flow.md` for the
+authoritative flow specification (mirrored from project `docs/`).
 
 **Cost:** ~10 LLM calls, ~2-4 min wall-clock, one Codex-rescue call
 for distillation (with Claude fallback).
@@ -165,8 +165,8 @@ verbotenes Vokabular of each.
 For functional guidance on **which archetype to pick deliberately**
 (instead of letting mod-4 decide) and an optional four-phase sequence
 (`Jester -> Librarian -> Alchemist -> Radagast`), see
-`docs/USAGE-PATTERNS.md`. That document is a user heuristic, not a
-skill rule — the skill itself stays a single-shot randomized picker.
+`references/usage-patterns.md`. That document is a user heuristic, not
+a skill rule — the skill itself stays a single-shot randomized picker.
 
 ## Operating Instructions (Claude follows this on invocation)
 
@@ -349,145 +349,37 @@ The skill earns its continued existence through use, not through existence.
 
 ## Radagast-Activation Gate
 
-`radagast-brown` is built and present in the repo, but stays **latent**
-until Review 1 (triggered when Run 10 completes, earliest; 2026-04-29 is the hard fallback date) confirms the three original V1 archetypes
-earned at least their minimum keeper-count in the Feldtest. Until then,
-the stochastic picker treats timestamp-mod-4 result `3` as a re-roll to
-mod-3 (so jester/librarian/alchemist split the probability space).
+`radagast-brown` is **ACTIVE** since 2026-04-23. mod-4 is live; all four
+archetypes participate at equal 25% probability.
 
-If Review 1 fails the museum pre-check (< 3 keepers across the first
-runs), `radagast-brown.md` stays in the repo as an unused asset but is
-not added to the active pool. Rationale: adding breadth to a skill that
-has not yet earned depth is the exact adoption-is-the-risk pattern the
-museum clause was written to prevent.
+Four binding conditions remain in force for Radagast outputs
+(first-sentence vocabulary rule, no foreign-field smuggling,
+optimization-under-care flagging, anti-folder-sprawl limit). A lexical
+repetition review triggers after 5 live Radagast runs.
 
-**Activation sub-gate (added 2026-04-23):** Review 1 success is
-necessary but not sufficient. Before the re-roll rule is removed, a
-forced Radagast blindtest runs over three recent topics (typically the
-last three single-runs before Review 1). The three Radagast outputs are
-scored against the same Wert/Umsetzbarkeit/Systemfit rubric as Review 1.
-Pass condition: at least 2 of 3 forced Radagast runs score as `kept` or
-`conditional` under the rubric. Fail condition: Radagast stays latent,
-`radagast-brown.md` prompt template gets a revision pass before the next
-activation attempt.
+For the full activation history, binding conditions, repetition watch
+criteria, and draw-frequency rationale, see
+`references/radagast-activation.md`.
 
-### Activation Outcome (2026-04-23)
+## Review Rubric
 
-**Radagast is ACTIVE.** mod-4 is live; the re-roll-to-mod-3 rule is
-removed from Step 2.
+All reviews use three criteria: **Wert** (genuinely new working mode?),
+**Umsetzbarkeit** (testable in 1-2 hours?), **Systemfit** (fits
+Agentic-OS/Claude/Codex/Wiki without architectural theater?).
 
-Sub-gate passed under three independent votes (user, Codex Juror 1,
-Codex Juror 2) with Runs 11/12/13 scoring kept/conditional each, no
-grove voice-off.
+Verdicts per run: `kept`, `conditional`, or `backlog`. The old
+per-output `kept` checkbox remains for museum-clause mechanics
+(14-day artefact-materialization tracking).
 
-Activation carries four binding conditions that the prompt template and
-review process must honor:
+For the full rubric, the labyrinth-librarian special rule, and verdict
+semantics, see `references/review-rubric.md`.
 
-1. **First-sentence vocabulary rule strictly enforced.** The first
-   sentence of every provocation MUST contain >=2 items from the
-   Pflicht-Vokabular list in `radagast-brown.md`. Grace in the second
-   sentence no longer counts. Reviewers flag violations in field-notes.
-2. **No foreign-field smuggling.** Half-quotes like "Seefahrer haben
-   ihn an den Horizont verbannt" or "Imker beobachten..." are forbidden,
-   even without an explicit "In der X-Lehre" preface. That phrasing
-   belongs to labyrinth-librarian.
-3. **Optimization-under-care-disguise gets flagged.** Provocations whose
-   anchor is a new schema field, a new hook, a new time-window, or a
-   new frontmatter key count as voice-drift-light even if the text
-   sounds like care. The rubric reviewer marks these with a yellow dot.
-4. **Anti-folder-sprawl meta-rule.** Per single run, Radagast may
-   propose AT MOST ONE new folder convention. If the run's 10
-   provocations together name multiple new folders (`scrapyard/`,
-   `longhouse/`, `unsortiert/`, `empty-nests/`, etc.), reviewer
-   collapses them to the strongest one in the Top-3.
+## Future Behavior (out of scope)
 
-### Repetition Watch (added 2026-04-23)
-
-Radagast's imagery pool (Unterholz, Daemmerung, Nest, Winterruhe, Fell,
-Kreatur, Rhythmus, Gast, atmen, pflegen, Wetter) is small and prone to
-formulaic repetition across runs. After **5 live Radagast runs**
-(counting from Run 14 forward, not the blindtest), a lexical-repetition
-review is triggered. Checkpoint criterion: do the 5 runs together show
->=20 distinct lead images, or are the same 5-7 recycling?
-
-If lexical concentration is too high: prompt template gets a
-diversification pass (expanded Pflicht-Vokabular list, explicit
-rotation rule, or bans on the top-3 most-used images for the next
-batch).
-
-### Draw-Frequency Note
-
-Radagast occupies 1 of 4 archetype slots with equal stochastic
-probability (25% per draw). The activation review explicitly notes that
-Radagast is not a stronger archetype than the other three — he opens a
-different axis (protection/rhythm/non-harvest) that the others cannot.
-Over-drawing Radagast would soften the skill. The natural 25% cap is
-considered adequate; no special suppression rule needed at this time.
-Re-evaluated at Review 2 (Run 20 or 2026-05-21).
-
-## Review Rubric (added 2026-04-23, post-Review-1)
-
-All future reviews use these three criteria per provocation and per run:
-
-1. **Wert (Value)** — Does the provocation open a genuinely new working
-   mode, or is it a near-variation of something already present?
-2. **Umsetzbarkeit (Feasibility)** — Testable in under 1-2 hours, or
-   materializable as a small backlog artefact? The Adoption-Cost-Tag
-   (`low` / `medium` / `high` / `system-break`) is the first signal
-   here, but the rubric overrides the tag.
-3. **Systemfit** — Fits into Agentic-OS / Claude / Codex / Wiki workflow
-   without requiring architectural theater?
-
-**Special rule for labyrinth-librarian runs:** Do not evaluate the
-historical/scientific analogies as facts. Only the transferred
-mechanism is rated. An analogy that turns out to be fictional is not a
-mark against the provocation if the mechanism translates cleanly.
-
-**Verdict levels per run** (new semantics, replaces old binary kept/not-kept):
-
-- `kept` — Run produced durable value, keeper independent of artefact tracking.
-- `conditional` — Run becomes `kept` when a named artefact materializes
-  within its deadline. The Review block lists the exact artefact and
-  deadline per conditional run.
-- `backlog` — Run contains strong concepts but is too heavy for
-  immediate adoption. Moved to design backlog, not discarded.
-
-The old per-output `kept` checkbox remains for museum-clause mechanics
-(it tracks whether the output materialized into wiki/inbox, ISSUES2FIX,
-or skills-backlog within 14 days). The new run-level verdict is
-additional, not a replacement.
-
-## Future Behavior (deliberately out of scope for V1)
-
-The following are documented to preserve design intent and prevent
-ad-hoc reimplementation. None of them are built in V1.
-
-### V1.1 Candidates
-
-- **stage-magician** archetype. Purpose: sensory/dramaturgic
-  provocations using stage, prop, reveal, audience, timing. Originally
-  tagged as the V1.1 sensory slot. **Parked in v0.3.0** because
-  `radagast-brown` took the adjacent slot (biosphere/care axis)
-  first; dramaturgic/sensory stays open for V1.2 if Radagast proves
-  itself but a further distinct voice is still missing.
-
-### V2 Extensions
-
-- **`--deep` mode.** Calls `devil-advocate-swarms:swarm-orchestrator`
-  on the V1 quick output to pressure-test the 10 provocations and
-  cluster them into 3 fleshed-out outliers.
-- ~~`--chat` mode~~ — shipped as v0.5.0, 2026-04-23. See Chat-Mode
-  section above. The originally envisioned tmux/costly-debate version
-  was NOT built; instead the flow is synchronous (rounds 1-2 parallel
-  calls, round 3 Codex distillation), ~10 LLM calls total.
-
-### V3 Bridge
-
-- **Telegram bridge.** ductor (github.com/PleasePrompto/ductor) or
-  Anthropic's official external_plugins/telegram. Decision deferred
-  to 2 weeks of V1 usage. Security gate: full security-audit and
-  codex:rescue security-review pass required before any Telegram
-  adoption.
+Design intent for deferred features (stage-magician V1.1, `--deep` V2,
+Telegram bridge V3) is preserved in `references/roadmap.md`. None of
+these are built. The `--chat` mode shipped as v0.5.0 and is documented
+in the Chat-Mode section above.
 
 ## File Layout
 
@@ -509,13 +401,34 @@ crazy-professor/                              (repo root = plugin root)
         |   |-- chat-round-1-wrapper.md       (v0.5.0 Chat-Mode)
         |   |-- chat-round-2-wrapper.md       (v0.5.0 Chat-Mode)
         |   \-- chat-curator.md               (v0.5.0 Codex distillation prompt)
+        |-- references/                       (load-on-demand detail docs)
+        |   |-- radagast-activation.md        (activation history + binding conditions)
+        |   |-- review-rubric.md              (3-criteria rubric + verdict semantics)
+        |   |-- roadmap.md                    (V1.1 / V2 / V3 out-of-scope design intent)
+        |   |-- chat-mode-flow.md             (authoritative chat-mode flow spec)
+        |   \-- usage-patterns.md             (user heuristic: deliberate archetype pick)
         \-- resources/
-            |-- provocation-words.txt         (100 curated words)
+            |-- provocation-words.txt         (200+ curated words)
             |-- retired-words.txt             (starts empty)
             |-- po-operators.md
             |-- output-template.md            (single-run format)
             \-- chat-output-template.md       (v0.5.0 Chat-Mode format)
 ```
+
+## Additional Resources
+
+Consult these reference files when the relevant topic comes up:
+
+- **`references/radagast-activation.md`** — Activation history, four
+  binding conditions, repetition-watch criteria, draw-frequency note.
+- **`references/review-rubric.md`** — Full Wert/Umsetzbarkeit/Systemfit
+  rubric, labyrinth-librarian special rule, verdict semantics.
+- **`references/roadmap.md`** — V1.1 (stage-magician), V2 (`--deep`),
+  V3 (Telegram) — deferred design intent.
+- **`references/chat-mode-flow.md`** — Authoritative chat-mode
+  specification (Round 1/2/3 details, fallback logic).
+- **`references/usage-patterns.md`** — Heuristic for picking an
+  archetype deliberately instead of the stochastic default.
 
 Output target (target project's memory, not plugin):
 ```
