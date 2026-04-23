@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "crazy-professor",
-      "description": "Divergence generator for creative ideation. Three voices (first-principles-jester, labyrinth-librarian, systems-alchemist) produce 10 provocations per call, never advice.",
+      "description": "Divergence generator for creative ideation. Four active voices produce strange but anchored provocations, never advice. Supports default 10-provocation runs and optional --chat mode with a 20-idea distillation.",
       "category": "creativity",
       "source": {
         "source": "github",

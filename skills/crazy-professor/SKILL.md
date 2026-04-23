@@ -15,14 +15,14 @@ description: >
   up", "destabilize", "unstick me", "too normal", "weirder starting
   point", "unhinged thinker", "nudge away from obvious", "radagast",
   "radagast der braune", "cozy provocation", "gentler nudge", "waldhaft".
-  Chat-Mode (v0.5.0, `--chat` flag): four archetypes in 3-round
+  Chat-Mode (v0.5.1, `--chat` flag): four archetypes in 3-round
   distilled dialog producing curated 20-idea output (5 per archetype)
   with Codex-based scoring. Trigger phrases for Chat-Mode: "chat mode",
   "chat-mode", "alle archetypen", "alle stimmen", "kuratierte ideen",
   "20 ideen", "destilliere", "crazy professor chat", "crazy chat".
 metadata:
   author: domes
-  version: '0.5.0'
+  version: '0.5.1'
   part-of: crazy-professor
   layer: divergence
   status: V1 + Chat-Mode
@@ -67,7 +67,7 @@ distillation flow, see Chat-Mode below.
   a tmux/telegram/ductor bridge).
 - No model routing.
 
-## Chat-Mode (v0.5.0, new)
+## Chat-Mode (v0.5.1)
 
 **Invocation:**
 
@@ -285,7 +285,8 @@ This is NOT an abort; the chat-run continues to round 3.
 **Step C5: Round 3 — Codex distillation.** Invoke `codex:codex-rescue`
 subagent (run_in_background=false) with the prompt from
 `prompt-templates/chat-curator.md`. Supply all round-1 + round-2
-provocations.
+provocations. The Codex return contract is direct Markdown text only:
+no scratch file, no prepared input file, no path-only response.
 
 **Step C5 fallback:** If Codex invocation fails (timeout, error,
 rate-limit), run the identical distillation prompt through Claude
@@ -294,8 +295,10 @@ frontmatter and record `distiller_reason`.
 
 **Step C5 validation:** The Codex/Claude output must have exactly 4
 sections × 5 ideas, a Top-3 Cross-Pollination block, and a Next
-Experiment block. If the structure is broken: one retry with specific
-error hint; if that also fails, run Claude-fallback.
+Experiment block. If the structure is broken or Codex returns only a
+file path / prepared-input note: one retry with the specific error hint
+and the direct-text return contract repeated. If that also fails, run
+Claude-fallback.
 
 **Step C6: Write output file** using `resources/chat-output-template.md`
 at path `.agent-memory/lab/crazy-professor/chat/YYYY-MM-DD-HHMM-<topic-slug>.md`.
@@ -378,7 +381,8 @@ semantics, see `references/review-rubric.md`.
 
 Design intent for deferred features (stage-magician V1.1, `--deep` V2,
 Telegram bridge V3) is preserved in `references/roadmap.md`. None of
-these are built. The `--chat` mode shipped as v0.5.0 and is documented
+these are built. The `--chat` mode shipped as v0.5.0 and was stabilized
+in v0.5.1. It is documented
 in the Chat-Mode section above.
 
 ## File Layout
@@ -398,9 +402,9 @@ crazy-professor/                              (repo root = plugin root)
         |   |-- labyrinth-librarian.md
         |   |-- systems-alchemist.md
         |   |-- radagast-brown.md
-        |   |-- chat-round-1-wrapper.md       (v0.5.0 Chat-Mode)
-        |   |-- chat-round-2-wrapper.md       (v0.5.0 Chat-Mode)
-        |   \-- chat-curator.md               (v0.5.0 Codex distillation prompt)
+        |   |-- chat-round-1-wrapper.md       (v0.5.1 Chat-Mode)
+        |   |-- chat-round-2-wrapper.md       (v0.5.1 Chat-Mode)
+        |   \-- chat-curator.md               (v0.5.1 Codex distillation prompt)
         |-- references/                       (load-on-demand detail docs)
         |   |-- radagast-activation.md        (activation history + binding conditions)
         |   |-- review-rubric.md              (3-criteria rubric + verdict semantics)
@@ -412,7 +416,7 @@ crazy-professor/                              (repo root = plugin root)
             |-- retired-words.txt             (starts empty)
             |-- po-operators.md
             |-- output-template.md            (single-run format)
-            \-- chat-output-template.md       (v0.5.0 Chat-Mode format)
+            \-- chat-output-template.md       (v0.5.1 Chat-Mode format)
 ```
 
 ## Additional Resources
@@ -436,5 +440,5 @@ Output target (target project's memory, not plugin):
 |-- field-notes.md                            (one line per run, single+chat mixed)
 |-- YYYY-MM-DD-HHMM-<topic-slug>.md           (single-run output)
 \-- chat/
-    \-- YYYY-MM-DD-HHMM-<topic-slug>.md       (chat-mode output, v0.5.0)
+    \-- YYYY-MM-DD-HHMM-<topic-slug>.md       (chat-mode output, v0.5.1)
 ```

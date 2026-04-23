@@ -1,7 +1,7 @@
 ---
 title: Chat-Mode Runde-3 Codex-Destillator Prompt
 purpose: Codex bekommt alle Runde-1- und Runde-2-Provokationen und destilliert auf exakt 20 Ideen, 5 pro Archetype.
-version: 0.5.0
+version: 0.5.1
 ---
 
 # Codex-Destillator Prompt (Runde 3)
@@ -77,6 +77,15 @@ Zusaetzlich: Adoption-Cost-Tag pro Idee:
 - `medium` = bestehende Struktur erweitert.
 - `high` = Architektur-Eingriff, mehrere Plugins betroffen.
 - `system-break` = greift Grundfunktion an.
+
+U-Skala hart kalibrieren:
+- U=5: in <15 Minuten mit einem einzigen Shell-Befehl oder einer
+  einzelnen Datei-/Notiz-Aktion testbar.
+- U=4: in <1 Stunde testbar, ohne Workflow-, Template- oder
+  Skill-Aenderung.
+- U=3: braucht kleine Workflow- oder Template-Arbeit.
+- U=2: braucht Skill-Aenderung oder mehrere koordinierte Dateien.
+- U=1: braucht Architektur-Aenderung oder mehrere Plugins.
 
 Output-Format (Markdown):
 
@@ -168,6 +177,15 @@ Regeln fuer die Destillation:
 
 ---
 
+Rueckgabe-Format:
+
+Schreibe dein komplettes Ergebnis als direkte Text-Antwort im Chat.
+Schreibe KEINE Datei. Erzeuge KEIN Scratch-File. Bereite KEIN
+Input-File vor. Antworte NICHT nur mit einem Pfad. Der aufrufende
+Agent nimmt deine Text-Antwort wortwoertlich und fuegt sie in sein
+Output-File ein. Wenn du eine Datei schreibst oder nur einen Pfad
+zurueckgibst, gilt der Distiller-Run als fehlgeschlagen.
+
 Wenn du die 20er-Liste fertig hast, schreibe NUR das Markdown-Ergebnis
 zurueck. Kein Prolog, kein Meta-Kommentar, keine Bitte um Feedback.
 Der Main-Flow nimmt deinen Output und packt ihn direkt ins
@@ -205,6 +223,11 @@ Experiment), und fuegt es ins Output-File ein.
 Bei Struktur-Fehler: einmal re-invoke mit Hinweis "Deine vorherige
 Antwort hatte Format-Fehler: <spezifischer Hinweis>. Korrigiere nach
 Spec." Wenn auch das fehlschlaegt → Claude-Fallback.
+
+Wenn Codex nur einen Dateipfad, eine "prepared input"-Meldung oder
+ein Scratch-Artefakt statt direktem Markdown-Text liefert, zaehlt das
+als Struktur-Fehler. Der Retry wiederholt explizit: keine Datei, keine
+Pfad-Antwort, nur direkte Markdown-Textantwort.
 
 ## Abnahme-Kriterien fuer Phase 4
 

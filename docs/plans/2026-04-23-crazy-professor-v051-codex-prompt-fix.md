@@ -2,7 +2,7 @@
 title: crazy-professor v0.5.1 — Codex-Distiller-Prompt Fix
 project_shortname: cp-codex
 created: 2026-04-23
-status: backlog
+status: implemented
 origin: v0.5.0 Phase-8 Review Known Issue #1
 priority: medium
 ---
@@ -143,3 +143,15 @@ v0.5.1 wird gebaut, sobald:
   Problem ist systemisch, nicht One-off).
 
 Oder auf explizite User-Anforderung.
+
+## Implementation Status (2026-04-23)
+
+Implemented:
+- Direct text-return contract added to `chat-curator.md`.
+- U-scale calibration added to `chat-curator.md`.
+- Retry semantics now treat path-only/file-prep Codex responses as structure failures.
+- `SKILL.md`, plugin manifest, marketplace metadata, README, command docs, and output templates bumped/synchronized to v0.5.1.
+- Repo hygiene added via `.gitignore`.
+
+Still pending:
+- A real Chat-Mode smoke test with Codex available to verify that the direct text-return contract changes runtime behavior.

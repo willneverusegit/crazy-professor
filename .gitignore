@@ -1,0 +1,6 @@
+.agent-memory/
+*.stackdump
+*.tmp
+*.temp
+*.log
+docs/4 personas ideen.txt
