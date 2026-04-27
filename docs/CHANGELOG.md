@@ -1,10 +1,12 @@
 # Changelog — crazy-professor
 
-Neueste Eintraege oben. Format: `## [YYYY-MM-DD] Kurztitel`
+Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versions-Bumps, sonst `## [YYYY-MM-DD] Kurztitel`. Versions-Policy in `docs/VERSIONING.md`.
 
 ---
 
-## [2026-04-27] Phase 1 — Vertragsbereinigung & Quick-Wins
+## [v0.6.0] [2026-04-27] Phase 1 — Vertragsbereinigung & Quick-Wins
+
+**Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil Topic-Resolution-Vertrag breaking change ist (`--chat` ohne Topic wird jetzt explizit abgelehnt; vorher implizites Verhalten). Master-Plan-Phase 1 abgeschlossen.
 
 - `docs/PROJECT.md`, `docs/CAPABILITIES.md`, `docs/ARCHITECTURE.md`, `docs/CHANGELOG.md` aus globalem Template angelegt
 - Input-/Trigger-Vertrag in `README.md`, `commands/crazy.md`, `SKILL.md` vereinheitlicht — eine Semantik fuer leeres Topic und `--chat` ohne Topic
@@ -13,6 +15,8 @@ Neueste Eintraege oben. Format: `## [YYYY-MM-DD] Kurztitel`
 - Mehrwort-Provocation-Words geklaert (Entscheidung: Pool auf Einzel- und 2-Wort-Phrasen erlaubt, `output-template.md` Marker-Format akzeptiert das)
 - `SKILL.md` von 464 auf 206 Zeilen getrimmt (-56%) — Operating-Instructions (Steps 1-7 + C1-C8) nach `skills/crazy-professor/references/operating-instructions.md` und Hard Rules (inkl. Museum-Clause, Field-Test-Rule, Radagast-Gate, Review-Rubric) nach `skills/crazy-professor/references/hard-rules.md` extrahiert. Plan-Ziel war ~150 Zeilen; bei 206 belassen, weil Frontmatter (28) + Trigger-Phrases-Block + Archetype-Tabelle + File-Layout-Diagramm zur Skill-Discoverability beim Loaden gebraucht werden — der echte Body-Inhalt ist 166 Zeilen.
 - Pfad-Konvention etabliert: alle inter-File-Pfade in SKILL.md, operating-instructions.md, hard-rules.md verwenden `<repo-root>/...` Notation, damit sie aus jedem File konsistent auflösbar sind.
+- `docs/VERSIONING.md` angelegt — explizite Versions-Policy für die 0.x-Phase, Bump-Trigger nach Master-Plan-Phasen-Mapping.
+- Versions-Bump auf `0.6.0` in `plugin.json`, `SKILL.md` Frontmatter, `output-template.md`, `chat-output-template.md`, `chat-mode-flow.md` (Frontmatter + Output-Beispiel), drei `prompt-templates/chat-*.md`. SKILL.md-Body-Texte entkoppelt (statt "v0.5.1" jetzt "since v0.5.0" für historische Aussagen).
 
 ## [2026-04-26] Erweiterungs-Master-Plan via plan-merger Skill
 

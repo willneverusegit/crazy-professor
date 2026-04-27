@@ -14,7 +14,7 @@ Divergence-Generator als Claude-Code-Plugin: vier Archetypen produzieren strange
 
 ## Aktueller Stand
 
-v0.5.1 released. Single-Run und Chat-Mode aktiv. Codex-Smoke-Test 2026-04-26 sauber. Phase 1 des Erweiterungs-Master-Plans (`docs/plans/2026-04-26-...`) startet — Vertragsbereinigung + Quick-Wins. Picker, Telemetrie, Linter, Run-Planner kommen in Phase 2-5.
+v0.6.0 released 2026-04-27. Single-Run und Chat-Mode aktiv. Codex-Smoke-Test 2026-04-26 sauber. Master-Plan-Phase 1 (Vertragsbereinigung & Quick-Wins) abgeschlossen — Topic-Resolution-Vertrag scharf, `--chat` ohne Topic wird abgelehnt, SKILL.md auf Progressive Disclosure mit Operating-Instructions + Hard Rules in `references/`, Pfad-Konvention `<repo-root>/...`. Picker (Phase 2), Linter-Trio (Phase 3), Telemetrie (Phase 4), Run-Planner (Phase 5) stehen an. Versions-Policy in `docs/VERSIONING.md`.
 
 ## Kernfaehigkeiten
 

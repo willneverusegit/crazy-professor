@@ -1,5 +1,5 @@
 {
   "name": "crazy-professor",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Divergence generator for creative ideation. Four active voices (first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown) produce strange but anchored provocations, never advice. Default mode returns 10 provocations; optional --chat mode runs all four voices and distills 20 ideas. Local-only; Telegram bridge is explicitly out of scope."
 }

@@ -15,14 +15,14 @@ description: >
   up", "destabilize", "unstick me", "too normal", "weirder starting
   point", "unhinged thinker", "nudge away from obvious", "radagast",
   "radagast der braune", "cozy provocation", "gentler nudge", "waldhaft".
-  Chat-Mode (v0.5.1, `--chat` flag): four archetypes in 3-round
+  Chat-Mode (`--chat` flag, since v0.5.0): four archetypes in 3-round
   distilled dialog producing curated 20-idea output (5 per archetype)
   with Codex-based scoring. Trigger phrases for Chat-Mode: "chat mode",
   "chat-mode", "alle archetypen", "alle stimmen", "kuratierte ideen",
   "20 ideen", "destilliere", "crazy professor chat", "crazy chat".
 metadata:
   author: domes
-  version: '0.5.1'
+  version: '0.6.0'
   part-of: crazy-professor
   layer: divergence
   status: V1 + Chat-Mode
@@ -60,7 +60,7 @@ Skill crazy-professor "<topic>"
 One archetype, 10 provocations, one next-experiment. ~30s, 1 LLM call.
 The fastest mode.
 
-**Chat-Mode (v0.5.1):**
+**Chat-Mode (`--chat`):**
 
 ```
 Skill crazy-professor "<topic>" --chat
