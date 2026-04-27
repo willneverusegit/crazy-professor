@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-crazy-professor output validator — format-drift detection.
+crazy-professor output validator â€” format-drift detection.
 
 Reads a generated output file (single-run or chat-mode) and verifies the
 mandatory structure: frontmatter, divergence banner, provocation count
@@ -26,16 +26,14 @@ from pathlib import Path
 ARCHETYPES = ("first-principles-jester", "labyrinth-librarian",
               "systems-alchemist", "radagast-brown")
 PO_OPERATORS = ("reversal", "exaggeration", "escape")
-COST_VALUES = ("low", "medium", "high", "system-break")
 
 # Single-run provocation line shape:
 # <n>. <text> -- [cost: <level>] -- anchor: <text>
 # Accepts ASCII double-hyphen (--) or unicode dashes (em U+2014, en U+2013).
-SEP = r"(?:--|—|–)"
+SEP = r"(?:--|\u2014|\u2013)"
 PROVOCATION_RE = re.compile(
     rf"^\s*(\d+)\.\s+(.+?)\s+{SEP}\s+\[cost:\s*(low|medium|high|system-break)\]\s+{SEP}\s+anchor:\s+(.+?)\s*$"
 )
-NUMBERED_RE = re.compile(r"^\s*(\d+)\.\s+(.+?)\s*$")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 
 

@@ -165,7 +165,7 @@ def pick_chat(words: list[str], rows: list[dict], ts: dt.datetime) -> dict:
     picks = []
     for i, archetype in enumerate(ARCHETYPES):
         offset = i  # one second per archetype to vary operator pick
-        _, operator, ts_iso_local = picker_seed(ts, offset_seconds=offset)
+        _, operator, _ = picker_seed(ts, offset_seconds=offset)
         word = pick_word(words, ts, offset=i * 7)  # spread word picks
         intra_chat = "no"
         if word in chat_words:
@@ -181,6 +181,10 @@ def pick_chat(words: list[str], rows: list[dict], ts: dt.datetime) -> dict:
         )
         # In chat we never re-roll the archetype itself (one of each)
         archetype_kept = archetype
+        if re_rolled == "archetype":
+            re_rolled = "no"
+        elif re_rolled == "both":
+            re_rolled = "word"
         if intra_chat == "intra-chat":
             re_rolled = "intra-chat" if re_rolled == "no" else f"{re_rolled}+intra-chat"
         picks.append({
