@@ -9,8 +9,9 @@ deduplicated: 2026-04-27
 # Chat-Mode Flow Specification — Stub
 
 The full and authoritative chat-mode flow specification lives in
-[`docs/chat-mode-flow.md`](../../../docs/chat-mode-flow.md) at the plugin
-repo root.
+`<repo-root>/docs/chat-mode-flow.md` (where `<repo-root>` =
+`crazy-professor/`, the plugin repo root). Resolved from this stub's
+location: [`../../../docs/chat-mode-flow.md`](../../../docs/chat-mode-flow.md).
 
 This file is a stub maintained for backward compatibility — older SKILL.md
 references and load-on-demand patterns may still point at this path. The

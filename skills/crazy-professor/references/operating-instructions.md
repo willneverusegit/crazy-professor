@@ -2,12 +2,16 @@
 title: crazy-professor — Operating Instructions
 status: extracted from SKILL.md 2026-04-27 (Phase 1, point 1.6)
 load_when: any invocation, after parsing the trigger
+path_convention: all paths are relative to plugin repo root <repo-root> = crazy-professor/
 ---
 
 # Operating Instructions
 
 Claude follows these steps on every invocation. Steps 1-7 cover the
-default single-run path; Steps C1-C8 cover Chat-Mode (`--chat`).
+default single-run path; Steps C1-C8 cover Chat-Mode (`--chat`). All
+file paths below are relative to the plugin repo root (`<repo-root>` =
+`crazy-professor/`); resolve them from there, not from this file's
+location.
 
 ## Single-Run Path
 
@@ -32,9 +36,12 @@ contract (uniform across README.md, commands/crazy.md, and SKILL.md):
 - Archetype: take current UTC timestamp minute mod 4 (0=jester, 1=librarian,
   2=alchemist, 3=radagast-brown). This is deterministic-within-minute,
   random-across-minutes. All four archetypes active since 2026-04-23
-  (Radagast activation passed, see `references/radagast-activation.md`).
-- Provocation word: pick one random line from `resources/provocation-words.txt`.
-  Filter out any word that also appears in `resources/retired-words.txt`.
+  (Radagast activation passed, see
+  `<repo-root>/skills/crazy-professor/references/radagast-activation.md`).
+- Provocation word: pick one random line from
+  `<repo-root>/skills/crazy-professor/resources/provocation-words.txt`.
+  Filter out any word that also appears in
+  `<repo-root>/skills/crazy-professor/resources/retired-words.txt`.
   The pool contains both single words and 2-3-token phrases (e.g.
   `paradox tax`, `false-bottom`) — both formats are valid.
 - PO-operator: take timestamp second mod 3 (0=reversal, 1=exaggeration,
@@ -67,8 +74,8 @@ picker turns the log into backpressure that prevents archetype/word
 clustering across sessions. Not total prohibition — just anti-streak.
 
 **Step 3: Load the archetype's prompt template.** Read the matching
-`prompt-templates/*.md` file. Its "System-Prompt-Kern" section is the
-authoritative voice rules.
+`<repo-root>/skills/crazy-professor/prompt-templates/*.md` file. Its
+"System-Prompt-Kern" section is the authoritative voice rules.
 
 **Step 4: Generate 10 provocations.** Follow the archetype rules strictly.
 Each provocation carries two trailing metadata items: an Adoption-Cost-Tag
@@ -79,14 +86,17 @@ the user's infrastructure. Format per line:
 
 The cost tag is assigned honestly per provocation. No forced distribution.
 If all 10 are `system-break`, that is the truth about the run. If all 10
-are `low`, the topic was too tame. Scale defined in `resources/output-template.md`.
+are `low`, the topic was too tame. Scale defined in
+`<repo-root>/skills/crazy-professor/resources/output-template.md`.
 
 **Step 5: Pick ONE as the next experiment.** The one that is most
 testable in under one hour with tools the user already has.
 
 **Step 6: Write the output file** using the frontmatter and body
-structure defined in `resources/output-template.md`. Create the directory
-`.agent-memory/lab/crazy-professor/` if it does not exist.
+structure defined in
+`<repo-root>/skills/crazy-professor/resources/output-template.md`.
+Create the directory `.agent-memory/lab/crazy-professor/` (in the target
+project, not the plugin repo) if it does not exist.
 
 **Step 7: Append a line to `.agent-memory/lab/crazy-professor/field-notes.md`**
 as one Markdown table row that matches the existing table columns.
@@ -106,8 +116,8 @@ whether the guard thresholds (3 consecutive / last 10) need adjusting.
 
 When the invocation includes `--chat`, the single-run flow above is
 replaced by the 3-round chat-mode flow. The canonical specification with
-call-budget, error-handling, and degradation paths is `docs/chat-mode-flow.md`
-at the plugin repo root.
+call-budget, error-handling, and degradation paths is
+`<repo-root>/docs/chat-mode-flow.md`.
 
 **Step C1: Parse arguments.** Topic is mandatory; `--chat` flags chat
 mode. Reject `--chat` without topic per Step 1 contract above. Optional
@@ -152,9 +162,10 @@ This is NOT an abort; the chat-run continues to round 3.
 
 **Step C5: Round 3 — Codex distillation.** Invoke `codex:codex-rescue`
 subagent (run_in_background=false) with the prompt from
-`prompt-templates/chat-curator.md`. Supply all round-1 + round-2
-provocations. The Codex return contract is direct Markdown text only:
-no scratch file, no prepared input file, no path-only response.
+`<repo-root>/skills/crazy-professor/prompt-templates/chat-curator.md`.
+Supply all round-1 + round-2 provocations. The Codex return contract is
+direct Markdown text only: no scratch file, no prepared input file, no
+path-only response.
 
 **Step C5 fallback:** If Codex invocation fails (timeout, error,
 rate-limit), run the identical distillation prompt through Claude
@@ -168,9 +179,11 @@ file path / prepared-input note: one retry with the specific error hint
 and the direct-text return contract repeated. If that also fails, run
 Claude-fallback.
 
-**Step C6: Write output file** using `resources/chat-output-template.md`
-at path `.agent-memory/lab/crazy-professor/chat/YYYY-MM-DD-HHMM-<topic-slug>.md`.
-Create directory if it does not exist.
+**Step C6: Write output file** using
+`<repo-root>/skills/crazy-professor/resources/chat-output-template.md`
+at path `.agent-memory/lab/crazy-professor/chat/YYYY-MM-DD-HHMM-<topic-slug>.md`
+(in the target project, not the plugin repo). Create directory if it
+does not exist.
 
 **Step C7: Append field-notes row.** Same `field-notes.md` as
 single-runs, but with `mode: chat` marker, `archetype: all-4`, `word:

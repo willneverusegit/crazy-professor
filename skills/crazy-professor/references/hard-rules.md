@@ -2,9 +2,14 @@
 title: crazy-professor — Hard Rules
 status: extracted from SKILL.md 2026-04-27 (Phase 1, point 1.6)
 load_when: any invocation, before generation
+path_convention: all paths are relative to plugin repo root <repo-root> = crazy-professor/
 ---
 
 # Hard Rules
+
+All file paths below are relative to the plugin repo root (`<repo-root>` =
+`crazy-professor/`); resolve them from there, not from this file's
+location.
 
 These rules override helpfulness-tuning. They exist because persona
 prompting without guardrails can degrade factual accuracy by up to 30
@@ -15,8 +20,8 @@ percentage points on knowledge-heavy tasks (see Search Engine Journal,
    provocation, or "what if" -- never as recommendation.
 
 2. **The warning banner is always present.** The output template
-   (`resources/output-template.md`) must include the divergence warning
-   verbatim.
+   (`<repo-root>/skills/crazy-professor/resources/output-template.md`)
+   must include the divergence warning verbatim.
 
 3. **The goal of the topic is respected.** Conventions are attacked, goals
    are not.
@@ -64,9 +69,10 @@ Chat-mode has its own 5-run museum gate, independent of the V1 gate:
 After a provocation word has produced output in **3 invocations** and
 in all 3 cases the user flagged the result as "too close to variations
 of previous outputs" (in field-notes.md, in a column marked "retire?"),
-the word is moved from `resources/provocation-words.txt` to
-`resources/retired-words.txt`. This keeps the word pool alive rather
-than frozen.
+the word is moved from
+`<repo-root>/skills/crazy-professor/resources/provocation-words.txt` to
+`<repo-root>/skills/crazy-professor/resources/retired-words.txt`. This
+keeps the word pool alive rather than frozen.
 
 The list of archetypes is NOT subject to the same rule; archetype changes
 require a version bump.
@@ -83,7 +89,7 @@ repetition review triggers after 5 live Radagast runs.
 
 For the full activation history, binding conditions, repetition watch
 criteria, and draw-frequency rationale, see
-`references/radagast-activation.md`.
+`<repo-root>/skills/crazy-professor/references/radagast-activation.md`.
 
 ## Review Rubric
 
@@ -96,4 +102,5 @@ per-output `kept` checkbox remains for museum-clause mechanics
 (14-day artefact-materialization tracking).
 
 For the full rubric, the labyrinth-librarian special rule, and verdict
-semantics, see `references/review-rubric.md`.
+semantics, see
+`<repo-root>/skills/crazy-professor/references/review-rubric.md`.

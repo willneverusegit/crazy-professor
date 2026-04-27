@@ -69,8 +69,8 @@ Skill crazy-professor "<topic>" --chat
 Four archetypes in a 3-round sequence, producing a curated 20-idea
 output (5 per archetype). ~10 LLM calls, ~2-4 min wall-clock, one
 Codex-rescue call for distillation (with Claude fallback). Cost the
-deliberateness — see `docs/chat-mode-flow.md` for the canonical flow
-spec.
+deliberateness — see `<repo-root>/docs/chat-mode-flow.md` for the
+canonical flow spec.
 
 When to use which:
 
@@ -89,7 +89,8 @@ On each call, the skill:
 1. Picks **one of four archetypes** deterministically from a timestamp
    seed: `first-principles-jester`, `labyrinth-librarian`,
    `systems-alchemist`, `radagast-brown`.
-2. Picks **one provocation word** from `resources/provocation-words.txt`
+2. Picks **one provocation word** from
+   `<repo-root>/skills/crazy-professor/resources/provocation-words.txt`
    (single words and 2-3-token phrases both valid).
 3. Picks **one De Bono PO-operator**: `reversal`, `exaggeration`, or `escape`.
 4. Produces **exactly 10 provocations** to the user's topic, anchored in
@@ -105,8 +106,8 @@ On each call, the skill:
 
 The full step-by-step including Variation-Guard logic, Chat-Mode steps
 C1-C8, and the topic-resolution contract lives in
-`references/operating-instructions.md`. Load that file before
-generating any output.
+`<repo-root>/skills/crazy-professor/references/operating-instructions.md`.
+Load that file before generating any output.
 
 ## Hard Rules (load on every invocation)
 
@@ -114,8 +115,9 @@ The full Hard Rules block (output-is-never-advice, warning-banner,
 goal-respect, anchor-or-it-doesnt-count, exactly-one-experiment,
 no-cross-archetype-contamination), plus Museum-Clause, Chat-Mode
 Museum-Clause, Field-Test-Rule, Radagast-Activation-Gate, and Review
-Rubric, lives in `references/hard-rules.md`. Load that file before
-generating any output.
+Rubric, lives in
+`<repo-root>/skills/crazy-professor/references/hard-rules.md`. Load
+that file before generating any output.
 
 ## Archetypes (V1)
 
@@ -126,17 +128,18 @@ generating any output.
 | `systems-alchemist` | Rewires flows. Maps the topic as input/output/overflow/leak/wall and re-routes one element. | Precise, observational, like a process engineer drawing a flow diagram. |
 | `radagast-brown` | Protects the useful-uselessness. Asks what needs care, shelter, slowness -- defends a part of the system against optimization. | Softly distracted but never dumb. Speaks in living creatures and natural time (seasons, weather, dusk). |
 
-See `prompt-templates/first-principles-jester.md`,
-`prompt-templates/labyrinth-librarian.md`,
-`prompt-templates/systems-alchemist.md`,
-`prompt-templates/radagast-brown.md` for the full voice rules and
-verbotenes Vokabular of each.
+See `<repo-root>/skills/crazy-professor/prompt-templates/first-principles-jester.md`,
+`<repo-root>/skills/crazy-professor/prompt-templates/labyrinth-librarian.md`,
+`<repo-root>/skills/crazy-professor/prompt-templates/systems-alchemist.md`,
+`<repo-root>/skills/crazy-professor/prompt-templates/radagast-brown.md`
+for the full voice rules and verbotenes Vokabular of each.
 
 For functional guidance on **which archetype to pick deliberately**
 (instead of letting mod-4 decide) and an optional four-phase sequence
 (`Jester -> Librarian -> Alchemist -> Radagast`), see
-`references/usage-patterns.md`. That document is a user heuristic, not
-a skill rule — the skill itself stays a single-shot randomized picker.
+`<repo-root>/skills/crazy-professor/references/usage-patterns.md`.
+That document is a user heuristic, not a skill rule — the skill itself
+stays a single-shot randomized picker.
 
 ## Out-of-Scope (deliberate)
 
@@ -146,11 +149,21 @@ a skill rule — the skill itself stays a single-shot randomized picker.
   batches, no auto-schedule.
 
 Design intent for deferred features (stage-magician V1.1, `--deep` V2,
-Telegram bridge V3) is preserved in `references/roadmap.md`. None of
+Telegram bridge V3) is preserved in
+`<repo-root>/skills/crazy-professor/references/roadmap.md`. None of
 these are built. The Erweiterungs-Master-Plan in
-`docs/plans/2026-04-26-crazy-professor-erweiterungs-master-plan.md`
+`<repo-root>/docs/plans/2026-04-26-crazy-professor-erweiterungs-master-plan.md`
 schedules Picker-Skript, Linter-Trio, Eval-Suite, Telemetrie,
 Run-Planner, and optional GUI/Telegram as Phases 2-8.
+
+## Path Convention
+
+All file paths in this SKILL.md and in the load-on-demand references
+(`<repo-root>/skills/crazy-professor/references/operating-instructions.md`
+and `<repo-root>/skills/crazy-professor/references/hard-rules.md`) are
+written relative to the **plugin repo root** (`<repo-root>` =
+`crazy-professor/`). This makes them resolvable regardless of which
+file the reader is currently in.
 
 ## File Layout
 
