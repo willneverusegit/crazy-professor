@@ -38,7 +38,14 @@ Marketplace installs are cached under Claude Code's plugin cache. Source-repo ch
 /crazy <topic> --chat
 ```
 
-Runs the divergence generator on `<topic>`. If no topic is given, it uses whatever the conversation was just about. Add `--chat` when the topic needs all four voices and a curated 20-idea output.
+Runs the divergence generator on `<topic>`. Add `--chat` when the topic needs all four voices and a curated 20-idea output.
+
+**Topic resolution:**
+
+- **Single-run with topic** — runs normally.
+- **Single-run without topic** — uses the most recent concrete task, plan, or problem from the current conversation as topic. If the conversation context is empty, meta, or too vague (e.g. "tell me a story", "how does this skill work"), the skill asks one clarifying question and stops instead of fabricating a topic.
+- **Chat-mode with topic** — runs normally.
+- **Chat-mode without topic** — explicitly rejected. Chat-mode costs ~10 LLM calls and 2-4 min wall-clock; the user must name the topic deliberately. The skill returns: `Chat-mode requires an explicit topic. Run /crazy <topic> --chat or use single-run for ambient topics.`
 
 ### Trigger phrases
 

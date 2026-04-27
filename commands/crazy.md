@@ -9,11 +9,14 @@ Activate the `crazy-professor` skill and run it against the following arguments:
 
 **Arguments:** $ARGUMENTS
 
-If `$ARGUMENTS` is empty, run the skill on whatever the user was just working on in the current conversation. Use the most recent task, plan, or problem as the topic.
+Topic resolution (uniform contract — see SKILL.md "Operating Instructions" Step 1):
+
+- If `$ARGUMENTS` contains `--chat` and no topic text outside the flag, **reject explicitly** and stop. Return:
+  `Chat-mode requires an explicit topic. Run /crazy <topic> --chat or use single-run for ambient topics.`
+- If `$ARGUMENTS` is empty (no `--chat`, no topic), run single-run on the most recent concrete task, plan, or problem from the current conversation. If the conversation context is empty, meta, or too vague, ask one clarifying question and stop -- do not fabricate a topic.
+- If `$ARGUMENTS` contains a topic and no `--chat`, dispatch to single-run mode: one active archetype, one provocation word, one PO operator, exactly 10 provocations, and one next experiment.
+- If `$ARGUMENTS` contains a topic and `--chat`, dispatch to Chat-Mode: all four active archetypes, 3 rounds, final 20-idea distillation, and chat output template.
 
 Follow the skill's full protocol exactly.
-
-- If `$ARGUMENTS` contains `--chat`, dispatch to Chat-Mode: all four active archetypes, 3 rounds, final 20-idea distillation, and chat output template.
-- Otherwise dispatch to default single-run mode: one active archetype, one provocation word, one PO operator, exactly 10 provocations, and one next experiment.
 
 All four archetypes are active: first-principles-jester, labyrinth-librarian, systems-alchemist, and radagast-brown. No advice, no softening. Strange but anchored.
