@@ -69,3 +69,42 @@ Charakteristika dieses Tons:
 - Naive Frage, die keine Kritik ist, sondern Unschuld.
 - Illegalisierung ("Kopf darf keine Anweisung geben bevor...") als harter Bruch.
 - Provokation, die die Struktur verschiebt, nicht zerstoert.
+
+---
+
+## Lexicon-Gate (machine-readable, used by lint_voice.py)
+
+```yaml
+archetype: first-principles-jester
+# Required: at least N of these tokens must appear in each provocation
+# (case-insensitive substring match, so "verboten" matches "Wiederholungs-
+# verbot"). The jester has a 3-part structure (Zerlegung, Illegalisierung,
+# Re-Kombination), so we require markers from each part.
+required:
+  - warum
+  - verboten
+  - darf nicht
+  - waere wenn
+  - was waere
+  - besteht aus
+  - zerleg
+  - illegal
+required_min_per_provocation: 2
+# Forbidden: never appear anywhere in the output (these belong to other
+# archetypes). Match is case-insensitive substring.
+forbidden:
+  - in der mykologie
+  - in der biologie
+  - in der meteorologie
+  - in der chemie
+  - pilzmyzel
+  - katalysator
+  - membran
+  - reststoff
+  - ueberlauf
+  - flussdiagramm
+  - unterholz
+  - winterruhe
+  - mondphase
+  - daemmerung
+```

@@ -181,3 +181,86 @@ Vokabeln wurden in den Eroeffnungs-Saetzen wiederholt? Ziel: mindestens
 20 verschiedene Vokabeln in 50 Eroeffnungs-Saetzen (5 runs x 10 provs).
 Bei weniger: Diversifikations-Pass auf dieses Template, eventuell
 temporaerer Bann der Top-3-Vokabeln fuer die naechsten 10 Runs.
+
+---
+
+## Lexicon-Gate (machine-readable, used by lint_voice.py)
+
+```yaml
+archetype: radagast-brown
+# Required: at least 2 care-vocabulary tokens in the first sentence of
+# each provocation (per the binding rule in Activation Amendment 1).
+# Substring match is case-insensitive, so "Pfoetchen" matches "pfote".
+required:
+  - unterholz
+  - nest
+  - futter
+  - winterruhe
+  - wetter
+  - mondphase
+  - daemmerung
+  - rinde
+  - feder
+  - pfote
+  - fell
+  - wurzel
+  - huelle
+  - kreatur
+  - gast
+  - geraeusch
+  - stille
+  - pflegen
+  - warten
+  - saen
+  - ernten
+  - morsch
+  - nisten
+  - atmen
+  - tragen
+  - moos
+  - laub
+  - stamm
+  - zweig
+  - erde
+  - regen
+  - schnee
+  - hagel
+  - sturm
+  - ruhe
+  - schatten
+  - tau
+  - nebel
+  - wurm
+  - kaefer
+  - specht
+  - eule
+  - kreisen
+  - schlummer
+  - waechter
+required_min_per_provocation: 2
+required_in_first_sentence: true
+# Forbidden: system vocabulary belongs to systems-alchemist; foreign-field
+# openings belong to labyrinth-librarian; "warum eigentlich"-deconstruction
+# belongs to first-principles-jester. The "in der X-Lehre" clauses are
+# from Activation Amendment 2 (Kein Fremdfeld-Schmuggel).
+forbidden:
+  - input
+  - output
+  - reaktor
+  - katalysator
+  - membran
+  - ueberlauf
+  - reststoff
+  - flussdiagramm
+  - verschaltung
+  - illegalisier
+  - in der mykologie
+  - in der biologie
+  - in der meteorologie
+  - in der ornithologie
+  - in der mythologie
+  - seefahrer haben
+  - kartographen nannten
+  - imker beobachten
+  - ornithologen vermuten
+```

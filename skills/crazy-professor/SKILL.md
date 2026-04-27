@@ -22,7 +22,7 @@ description: >
   "20 ideen", "destilliere", "crazy professor chat", "crazy chat".
 metadata:
   author: domes
-  version: '0.7.0'
+  version: '0.8.0'
   part-of: crazy-professor
   layer: divergence
   status: V1 + Chat-Mode
@@ -104,18 +104,37 @@ On each call, the skill:
 7. Appends a row to `field-notes.md` with picker values and review
    placeholders.
 
-Since v0.7.0, two helper scripts live at
+Since v0.7.0 / v0.8.0, five helper scripts live at
 `<repo-root>/skills/crazy-professor/scripts/`:
 
-- `picker.py` — deterministic stochastic-element selection with built-in
-  variation-guard. Replaces the prose mod-4 mechanic with a callable
-  command. Output is JSON on stdout. Used as the preferred path in
-  Step 2/2b.
-- `validate_output.py` — format-drift detector for both single and
-  chat-mode outputs. Used as a pre-write check in Step 6.
+- `picker.py` (v0.7.0) — deterministic stochastic-element selection with
+  built-in variation-guard. Replaces the prose mod-4 mechanic with a
+  callable command. Output is JSON on stdout. Used as the preferred
+  path in Step 2/2b.
+- `validate_output.py` (v0.7.0) — format-drift detector for both single
+  and chat-mode outputs. Used as a pre-write check in Step 6.
+- `lint_voice.py` (v0.8.0) — per-archetype lexicon enforcement. Reads
+  the Lexicon-Gate YAML block at the bottom of each
+  `prompt-templates/<archetype>.md`, checks each provocation for
+  required vocabulary (warn) and forbidden cross-archetype vocabulary
+  (error). Used as a pre-write check in Step 5b, before the format
+  validator. Warn-only by default; `--strict` makes warns block too.
+- `lint_word_pool.py` (v0.8.0) — pre-commit guard for
+  `provocation-words.txt` and `retired-words.txt`. Catches duplicates,
+  case drift, multi-word format violations, whitespace bugs, and
+  retired/active overlap. Run by hand or via `scripts/run_linters.sh`;
+  not invoked per skill run.
+- `eval_suite.py` (v0.8.0) — evaluation harness. Stage B (default):
+  50 picker runs per archetype + lint+validate sweep over a corpus
+  directory of past outputs, writes a baseline report to
+  `docs/eval-baseline-<date>.md`. Stage C (`--live`): hook for live
+  skill invocations, currently a stub (live runs need Claude/Codex
+  orchestration).
 
-Both scripts are stdlib-only Python and optional. If Python is not
-available the prose mechanic still works.
+All five scripts are stdlib-only Python and optional. If Python is not
+available the prose mechanic still works (picker fallback is documented
+in operating-instructions). The validators degrade gracefully if not
+called -- they are pre-write checks, not gating runtime requirements.
 
 The full step-by-step including Variation-Guard logic, Chat-Mode steps
 C1-C8, and the topic-resolution contract lives in
@@ -210,12 +229,20 @@ crazy-professor/                              (repo root = plugin root)
         |   |-- roadmap.md
         |   |-- chat-mode-flow.md             (stub → docs/chat-mode-flow.md)
         |   \-- usage-patterns.md
-        \-- resources/
-            |-- provocation-words.txt
-            |-- retired-words.txt
-            |-- po-operators.md
-            |-- output-template.md
-            \-- chat-output-template.md
+        |-- resources/
+        |   |-- provocation-words.txt
+        |   |-- retired-words.txt
+        |   |-- po-operators.md
+        |   |-- field-notes-init.md           (template for fresh field-notes)
+        |   |-- field-notes-schema.md         (canonical schema spec)
+        |   |-- output-template.md
+        |   \-- chat-output-template.md
+        \-- scripts/                          (stdlib-only Python helpers)
+            |-- picker.py                     (v0.7.0)
+            |-- validate_output.py            (v0.7.0)
+            |-- lint_voice.py                 (v0.8.0, per-archetype lexicon)
+            |-- lint_word_pool.py             (v0.8.0, pool integrity)
+            \-- eval_suite.py                 (v0.8.0, baseline + sweep)
 ```
 
 ## Output Target

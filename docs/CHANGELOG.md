@@ -4,6 +4,20 @@ Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versio
 
 ---
 
+## [v0.8.0] [2026-04-27] Phase 3 — Linter-Trio + Eval-Suite + Lexicon-Gates
+
+**Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil die Eval-Suite Pass-Rate als Gate für Prompt-Edits etabliert (workflow-changing) und das Lexicon-Gate-Block in jedem Template ein neues maschinenlesbares Vertragselement ist. Master-Plan-Phase 3 abgeschlossen.
+
+- **3.1 Word-Pool-Linter** (`scripts/lint_word_pool.py`, ~150 Zeilen, stdlib-only): prüft `provocation-words.txt` und `retired-words.txt` auf Duplicates innerhalb und über beide Files, lowercase-Konformität, 1-3-Token-Form mit Single-Hyphen, kein Whitespace-Drift, kein Tab, kein Symbol außer `[a-z0-9]+(-[a-z0-9]+)*`. Pre-Commit-tauglich (siehe `scripts/run_linters.sh`). Default warnt bei Case-Borderlines, `--strict` promotet zu Error. Smoke-getestet: 176 reale Pool-Entries clean, synthetisches bad-pool fängt 11 Verstöße + Overlap.
+- **3.2 Voice-Linter** (`scripts/lint_voice.py`, ~270 Zeilen, stdlib-only): liest Lexicon-Gate-Block aus jedem `prompt-templates/<archetype>.md`, parst alle Provocations, prüft per Provocation: required tokens (warn bei Miss), required_patterns (regex), forbidden tokens (error). Mini-YAML-Parser im Skript für den genutzten Subset. Substring-Match case-insensitive auf normalized text. Pre-Write Step 5b in operating-instructions verdrahtet. Smoke-getestet gegen 15 echte Outputs auf Desktop: 7 PASS, 6 WARN-only (legitime Style-Varianten), 2 FAIL — beide FAILs sind echte Voice-Drift-Funde (Cross-Archetype-Vokabel).
+- **3.2a Lexicon-Gate-Block in jedem Template**: YAML-Code-Block am Ende von `first-principles-jester.md`, `labyrinth-librarian.md`, `systems-alchemist.md`, `radagast-brown.md`. Konservativ extrahiert aus den existierenden "Pflicht-Eroeffnung"/"Verbotenes Vokabular"-Blöcken in den System-Prompt-Kernen. Pro Archetype: required-Liste + required_min_per_provocation + (optional) required_in_first_sentence/required_in_first_chars + forbidden-Liste mit Cross-Archetype-Schmuggel-Detection. Librarian zusätzlich required_patterns für die offene Klasse "in der/im X-(kunde|ologie|...)" + Praktiker-Substantive.
+- **3.3 Eval-Suite** (`scripts/eval_suite.py`, ~310 Zeilen, stdlib-only): Stage B (default) 50 Picker-Aufrufe pro Archetype mit `--force-archetype` + Lint+Validate-Sweep über `--corpus`-Verzeichnis. Stage C (`--live --runs N`) als Hook-Stub für Live-Skill-Aufrufe (echte LLM-Calls erfordern Claude/Codex-Orchestrierung außerhalb des Skripts). Output: `docs/eval-baseline-<date>.md` mit Picker-Pass-Rate, Operator-Distribution, Unique Words und Per-Archetype Voice/Validator-Counts + Fail-File-Details. Erste Baseline `docs/eval-baseline-2026-04-27.md`: Picker 100% / 200 Runs, Validator findet 8 Legacy-Format-Files (pre-v0.7.0), Voice findet 3 echte Cross-Drifts.
+- **3.4 SKILL.md + operating-instructions verdrahtet**: Helper-Skripte-Block in SKILL.md von 2 auf 5 erweitert mit Versionen, File-Layout-Diagram um `scripts/` ergänzt. Step 5b "Voice lint" zwischen Step 5 und Step 6 in operating-instructions.md eingebaut mit warn/error-Severity-Erklärung.
+- **3.5 Pre-Commit-Wrapper + docs/linters.md**: `scripts/run_linters.sh` als convenience wrapper (ruft aktuell nur lint_word_pool, future-proof). `docs/linters.md` mit At-a-glance-Tabelle aller 4 Tools, Pre-Commit-Hook-Anleitung Linux+Windows, Lexicon-Gate-Format-Spec, Eval-Suite-Aufruf-Beispiel + Interpretations-Hinweise.
+- **Versions-Bump auf 0.8.0** in 9 frontmatter Files (`plugin.json`, SKILL.md, output-template.md, chat-output-template.md, chat-mode-flow.md frontmatter+example, chat-curator.md, chat-round-1-wrapper.md, chat-round-2-wrapper.md). PROJECT.md "Aktueller Stand" und "Offene Baustellen" updated. CAPABILITIES.md 3 Items von "geplant" auf "aktiv" umgestellt + Lexicon-Gate als neue Capability.
+
+---
+
 ## [v0.7.0] [2026-04-27] Phase 2 — Picker-Skript + field-notes-Schema + Output-Validator
 
 **Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil Picker-Skript als Pre-Tool-Step die Skill-Mechanik strukturell ändert. Master-Plan-Phase 2 abgeschlossen.

@@ -77,3 +77,58 @@ Charakteristika dieses Tons:
 - Kein System-Vokabular (kein "Input", kein "Verschaltung").
 - Pointe: "das Feld loest es schon, nur in anderer Sprache."
 - Uebersetzung endet in Provokation, nicht in Ratschlag.
+
+---
+
+## Lexicon-Gate (machine-readable, used by lint_voice.py)
+
+```yaml
+archetype: labyrinth-librarian
+# Required: each provocation must open with a foreign-field marker. The
+# template explicitly enumerates these fields (Biologie, Mykologie,
+# Meteorologie, Mythologie, Ornithologie, Architektur, Handwerk,
+# Ethnographie, Kartographie, Hydrologie, Musiktheorie, Lyrik,
+# Landwirtschaft) but the librarian is also allowed to invent neighboring
+# fields (Bienenkunde, Agronomie, Saatguterhaltung, Skriptorien-
+# Tradition, etc.). The required_patterns regex catches the open class:
+# "in/im/in einer/in den + <field with -kunde/-ologie/-graphie/-kultur/
+# -tradition/-theorie/-geschichte/-forschung/-wissenschaft/-lehre>", or
+# the field itself opening the sentence (e.g. "Die Mykologie beobachtet").
+required:
+  - in der mykologie
+  - in der biologie
+  - in der meteorologie
+  - in der mythologie
+  - in der ornithologie
+  - in der architektur
+  - im handwerk
+  - in der ethnographie
+  - in der kartographie
+  - in der hydrologie
+  - in der musiktheorie
+  - in der lyrik
+  - in der landwirtschaft
+  - in der chemie
+  - in der geologie
+required_patterns:
+  - '\bin (der|den|einer|einem)( [a-z-]+)? [a-z-]+(kunde|ologie|nomie|graphie|metrie|tradition|theorie|geschichte|forschung|wissenschaft|lehre|literatur|kultur|musik|kunst|baukunst|architektur|haltung)\b'
+  - '\bim (alten|fruehen|spaeten|mittelalterlichen|antiken|barocken|byzantinischen|edo) [a-z-]+\b'
+  - '\bdie (mykologie|biologie|meteorologie|mythologie|ornithologie|architektur|ethnographie|kartographie|hydrologie|musiktheorie|lyrik|landwirtschaft|chemie|geologie|agronomie|bienenkunde|saatguterhaltung) (beobachtet|kennt|zeigt|sieht|beschreibt|unterscheidet|hat)\b'
+required_min_per_provocation: 1
+required_in_first_chars: 200
+# Forbidden: system-engineering vocabulary belongs to systems-alchemist.
+forbidden:
+  - input
+  - output
+  - reaktor
+  - katalysator
+  - abfallstrom
+  - flussdiagramm
+  - ueberlauf
+  - verschaltung
+  - unterholz
+  - winterruhe
+  - mondphase
+  - daemmerung
+  - pflegefrage
+```

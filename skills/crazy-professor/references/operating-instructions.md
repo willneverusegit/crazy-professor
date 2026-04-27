@@ -116,6 +116,32 @@ are `low`, the topic was too tame. Scale defined in
 **Step 5: Pick ONE as the next experiment.** The one that is most
 testable in under one hour with tools the user already has.
 
+**Step 5b: Voice lint (since v0.8.0).** Before format validation, run
+the per-archetype voice linter on the draft. It enforces the Lexicon-
+Gate block at the bottom of `prompt-templates/<archetype>.md`:
+
+```bash
+python <repo-root>/skills/crazy-professor/scripts/lint_voice.py \
+  --templates-dir <repo-root>/skills/crazy-professor/prompt-templates \
+  --mode single <output-file>
+```
+
+The linter has two severity levels:
+
+- **warn**: a provocation has fewer than the required minimum of
+  archetype vocabulary (Pflicht-Vokabel-Miss). Default behavior is to
+  log the warning and continue -- legitimate provocations sometimes
+  rephrase outside the standard lexicon.
+- **error**: a provocation contains a forbidden cross-archetype token
+  (e.g. "Reaktor" in a Radagast output, "Unterholz" in an Alchemist
+  output). Errors indicate genuine voice drift and SHOULD trigger a
+  rewrite of the offending provocation before Step 6.
+
+For chat-mode use `--mode chat`; the linter checks each Round 3
+sub-section against its archetype's lexicon. Pass `--strict` if you
+want warns to block too (used by the eval suite when generating a
+strict-mode baseline).
+
 **Step 6: Write the output file** using the frontmatter and body
 structure defined in
 `<repo-root>/skills/crazy-professor/resources/output-template.md`.

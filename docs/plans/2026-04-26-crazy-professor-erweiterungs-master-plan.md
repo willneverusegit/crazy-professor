@@ -20,7 +20,7 @@ Der crazy-professor ist konzeptuell stark, dokumentationstechnisch dicht, aber *
 |-------|----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|--------|
 | 1     | **Vertragsbereinigung & Quick-Wins**                                 | Eindeutige Input-/Trigger-Spec; PROJECT.md+CHANGELOG.md angelegt; chat-mode-flow.md dedupliziert; Mehrwort-Words geklärt | ✅ (2026-04-27)     |
 | 2     | **Picker als Skript + field-notes-Schema**                           | Deterministisches Picker-Skript; field-notes.md-Schema im Repo; Init-Header-Helper; Output-Validator    | ✅ (2026-04-27)     |
-| 3     | **Linter-Trio + Eval-Suite**                                         | Word-Pool-Linter; Pflicht-/Verbotenes-Vokabel-Linter pro Archetype; Eval-Suite (Pass-Rate-Gate)         | ⏳     |
+| 3     | **Linter-Trio + Eval-Suite**                                         | Word-Pool-Linter; Pflicht-/Verbotenes-Vokabel-Linter pro Archetype; Eval-Suite (Pass-Rate-Gate)         | ✅ (2026-04-27)     |
 | 4     | **Telemetrie & Lernschleife**                                        | JSONL/SQLite-Run-Log; Variation-Guard-/Museum-Clause-Beobachtbarkeit; Patch-Suggestion-Loop alle 10 Runs | ⏳     |
 | 5     | **Run Planner**                                                      | Archetype-Selector + `--from-session` als gemeinsame Schicht; `--dry-run` für Picker-Vorschau           | ⏳     |
 | 6     | **Cross-Pollination + Kompakt-Modus**                                | `--chat --compact`; Round-2-Substanz-Check (`--strict-cross-pollination`); 4. PO-Operator aktiviert      | ⏳     |

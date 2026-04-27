@@ -15,9 +15,10 @@
 | Picker-Skript (deterministisch) | aktiv | 2026-04-27 (v0.7.0) | Python-Skript `scripts/picker.py` (stdlib-only). Modi: `--mode single` / `--mode chat`. Liest field-notes.md, wendet Variation-Guard an, gibt JSON. Optional als Pre-Tool-Step. |
 | field-notes-Schema im Repo | aktiv | 2026-04-27 (v0.7.0) | `resources/field-notes-schema.md` (canonical Spalten-Spec, 12 Spalten, append-only) + `resources/field-notes-init.md` (Init-Template, das Picker bei fehlender field-notes ins Ziel-Projekt kopiert) |
 | Output-Validator | aktiv | 2026-04-27 (v0.7.0) | Python-Skript `scripts/validate_output.py` (stdlib-only). Prüft Format-Drift in Single- und Chat-Mode-Output. Pre-Write-Check. |
-| Word-Pool-Linter | geplant | — | Phase 3: Doubletten/Whitespace/Case-Inkonsistenzen |
-| Pflicht-/Verbots-Vokabel-Linter | geplant | — | Phase 3: pro Archetype, blockiert Voice-Drift |
-| Eval-Suite | geplant | — | Phase 3: 50-100 Sample-Runs gegen Pflicht/Verbot/Schema |
+| Word-Pool-Linter | aktiv | 2026-04-27 (v0.8.0) | `scripts/lint_word_pool.py` (stdlib-only): Duplicates, Case, 1-3-Token-Form, Whitespace, retired/active Overlap. Pre-Commit (via `scripts/run_linters.sh`). |
+| Voice-Linter (Pflicht-/Verbots-Vokabel pro Archetype) | aktiv | 2026-04-27 (v0.8.0) | `scripts/lint_voice.py` (stdlib-only): liest Lexicon-Gate aus jedem Template, prüft per-Provocation. Warn-only by default für required-Misses, error für forbidden Cross-Tokens. Pre-Write Step 5b. |
+| Lexicon-Gate in Archetype-Templates | aktiv | 2026-04-27 (v0.8.0) | YAML-Block am Ende jedes `prompt-templates/<archetype>.md`. Source-of-Truth für required/forbidden Tokens + Patterns. |
+| Eval-Suite | aktiv | 2026-04-27 (v0.8.0) | `scripts/eval_suite.py` (stdlib-only): Stage B (default) 50 Picker-Runs/Archetype + Lint+Validate-Sweep über Corpus. Stage C (`--live`) Stub. Output: `docs/eval-baseline-<date>.md`. |
 | Telemetrie-Layer (JSONL/SQLite) | geplant | — | Phase 4: Run-Log mit Picker-Werten + Round-2-Status + Voice-Drift-Hits |
 | Patch-Suggestion-Loop | geplant | — | Phase 4: alle 10 Runs SKILL.md/Word-Pool-Patch-Vorschlag |
 | Run-Planner | geplant | — | Phase 5: Archetype-Selector aus Topic + `--from-session` |
