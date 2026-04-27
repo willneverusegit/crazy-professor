@@ -18,9 +18,9 @@
 | Word-Pool-Linter | aktiv | 2026-04-27 (v0.8.0) | `scripts/lint_word_pool.py` (stdlib-only): Duplicates, Case, 1-3-Token-Form, Whitespace, retired/active Overlap. Pre-Commit (via `scripts/run_linters.sh`). |
 | Voice-Linter (Pflicht-/Verbots-Vokabel pro Archetype) | aktiv | 2026-04-27 (v0.8.0) | `scripts/lint_voice.py` (stdlib-only): liest Lexicon-Gate aus jedem Template, prüft per-Provocation. Warn-only by default für required-Misses, error für forbidden Cross-Tokens. Pre-Write Step 5b. |
 | Lexicon-Gate in Archetype-Templates | aktiv | 2026-04-27 (v0.8.0) | YAML-Block am Ende jedes `prompt-templates/<archetype>.md`. Source-of-Truth für required/forbidden Tokens + Patterns. |
-| Eval-Suite | aktiv | 2026-04-27 (v0.8.0) | `scripts/eval_suite.py` (stdlib-only): Stage B (default) 50 Picker-Runs/Archetype + Lint+Validate-Sweep über Corpus. Stage C (`--live`) Stub. Output: `docs/eval-baseline-<date>.md`. |
-| Telemetrie-Layer (JSONL/SQLite) | geplant | — | Phase 4: Run-Log mit Picker-Werten + Round-2-Status + Voice-Drift-Hits |
-| Patch-Suggestion-Loop | geplant | — | Phase 4: alle 10 Runs SKILL.md/Word-Pool-Patch-Vorschlag |
+| Eval-Suite | aktiv | 2026-04-27 (v0.8.0) | `scripts/eval_suite.py` (stdlib-only): Stage B (default) 50 Picker-Runs/Archetype + Lint+Validate-Sweep über Corpus. Stage C (`--live`) Stub. Output: `docs/eval-baseline-<date>.md`. Seit v0.9.0 zusätzlich Telemetrie-Smoke-Test (`--telemetry`). |
+| Telemetrie-Layer (JSONL) | aktiv | 2026-04-27 (v0.9.0) | `scripts/telemetry.py` (stdlib-only): append-only JSONL pro Run mit `picker_values, re_rolled, distiller_used, round2_status, time_to_finish_ms, voice_cross_drift_hits, lint_pass`. Schema-validiert (single + chat). Subcommands: `log`, `summary`, `default-path`. Default-Pfad: `~/Desktop/.agent-memory/lab/crazy-professor/telemetry.jsonl` (override mit `--path`). 50-MB Hard-Cap. |
+| Patch-Suggestion-Loop | aktiv | 2026-04-27 (v0.9.0) | `scripts/patch_suggester.py` (stdlib-only): liest field-notes.md (`kept`/`retire`/`voice-off`-Marker), triggert alle 10 single-Mode-Runs (modulo-Gate, `--force` für manuell), schreibt Vorschlag nach `lab/.../patches/YYYY-MM-DD-suggestion-N.md`. NIE automatisch angewandt — Review-Gate. Step 7c in operating-instructions. |
 | Run-Planner | geplant | — | Phase 5: Archetype-Selector aus Topic + `--from-session` |
 | `--chat --compact` | geplant | — | Phase 6: Round 1+2 als `<details>`, Round 3 primaer |
 | `--strict-cross-pollination` | geplant | — | Phase 6: semantischer Substanz-Check fuer Round-2 |
@@ -49,5 +49,5 @@ Nicht zutreffend — crazy-professor exponiert keinen MCP-Server. Es nutzt das C
 - **Manuelles Triggering**: kein Auto-Schedule, kein Webhook, kein Bot
 - **Single-Topic pro Run**: Chat-Mode kann keinen Multi-Topic-Batch
 - **Keine Modell-Mix-Optionen**: Claude fuer Runde 1+2, Codex fuer Runde 3 ist fix
-- **Picker-Mechanik aktuell in Prosa**: deterministische Implementierung kommt in Phase 2
-- **Keine Telemetrie**: Variation-Guard, Museum-Clause, Repetition-Watch sind aktuell nur in Prosa beobachtbar (Phase 4 schliesst das)
+- **Picker-Skript ist optional**: Plugin laeuft auch ohne Python (Fallback-Prosa-Mechanik in operating-instructions Step 2)
+- **Telemetrie hat 50-MB-Hard-Cap**: bei Überlauf manuelle Rotation/Archivierung notwendig (kein Auto-Rotate)

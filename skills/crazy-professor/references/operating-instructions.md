@@ -179,6 +179,48 @@ makes Step 2b observable and is reviewed at Review 1 (triggered when Run
 10 completes, earliest; 2026-04-29 is the hard fallback date) to decide
 whether the guard thresholds (3 consecutive / last 10) need adjusting.
 
+**Step 7b: Append telemetry record (since v0.9.0).** After Step 7,
+append one JSONL record to the run-telemetry log via the helper:
+
+```bash
+python <repo-root>/skills/crazy-professor/scripts/telemetry.py log --json '{
+  "run_id": "<utc-iso>--<archetype>--<topic-slug>",
+  "timestamp": "<utc-iso>",
+  "mode": "single",
+  "topic_slug": "<topic-slug>",
+  "archetype": "<picked-archetype>",
+  "word": "<picked-word>",
+  "operator": "<picked-operator>",
+  "re_rolled": "<from-step-2b>",
+  "distiller_used": false,
+  "round2_status": "n/a",
+  "time_to_finish_ms": <wall-clock-ms-from-step-2-to-step-7>,
+  "voice_cross_drift_hits": <count-from-lint-voice-step-5b>,
+  "lint_pass": <true-if-validate-output-ok>
+}'
+```
+
+Default path: `~/Desktop/.agent-memory/lab/crazy-professor/telemetry.jsonl`
+(override with `--path`). Schema and helper are stdlib-only Python.
+Telemetry is the substrate for Museum-Clause / Variation-Guard /
+Repetition-Watch evaluation. Skip silently if Python is unavailable;
+the field-notes row from Step 7 remains the authoritative log.
+
+**Step 7c: Optional patch-suggestion-loop (since v0.9.0).** If the
+single-mode run count is a non-zero multiple of 10 (count rows in
+field-notes.md Log table where `archetype != all-4 (chat-mode)`), call:
+
+```bash
+python <repo-root>/skills/crazy-professor/scripts/patch_suggester.py \
+  --field-notes <target-project>/.agent-memory/lab/crazy-professor/field-notes.md
+```
+
+The script writes a non-automatic suggestion file to
+`<target-project>/.agent-memory/lab/crazy-professor/patches/YYYY-MM-DD-suggestion-N.md`
+listing proven words, retire candidates, and voice-drift hot spots.
+The suggestion is NEVER applied automatically. Mention the file in the
+user-facing summary so the user can review it.
+
 ## Chat-Mode Path (`--chat`)
 
 When the invocation includes `--chat`, the single-run flow above is
@@ -255,6 +297,33 @@ does not exist.
 **Step C7: Append field-notes row.** Same `field-notes.md` as
 single-runs, but with `mode: chat` marker, `archetype: all-4`, `word:
 multi`, `operator: multi`, `re-rolled` as aggregate.
+
+**Step C7b: Append telemetry record (since v0.9.0).** Like Step 7b, but
+with `mode: "chat"` and the four picks as a list:
+
+```bash
+python <repo-root>/skills/crazy-professor/scripts/telemetry.py log --json '{
+  "run_id": "<utc-iso>--chat--<topic-slug>",
+  "timestamp": "<utc-iso>",
+  "mode": "chat",
+  "topic_slug": "<topic-slug>",
+  "picks": [
+    {"archetype": "first-principles-jester", "word": "...", "operator": "...", "re_rolled": "..."},
+    {"archetype": "labyrinth-librarian",     "word": "...", "operator": "...", "re_rolled": "..."},
+    {"archetype": "systems-alchemist",       "word": "...", "operator": "...", "re_rolled": "..."},
+    {"archetype": "radagast-brown",          "word": "...", "operator": "...", "re_rolled": "..."}
+  ],
+  "distiller_used": <true-if-codex-or-claude-distiller-ran>,
+  "round2_status": "<n/a|ok|skipped|failed>",
+  "time_to_finish_ms": <wall-clock-ms>,
+  "voice_cross_drift_hits": <sum-across-archetypes>,
+  "lint_pass": <true-if-validator-passed>
+}'
+```
+
+`round2_status` mapping: `ok` if all four archetypes returned >= 2
+provocations, `skipped` if Step C4 set `round2_status: degraded`,
+`failed` if Step C3 abort fired.
 
 **Step C8: Summary to user.** Main-model writes a brief user-facing
 summary: the topic, the 4 archetype picks, round-2 status, the distiller

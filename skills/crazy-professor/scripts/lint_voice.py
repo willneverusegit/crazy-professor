@@ -14,10 +14,11 @@ Designed to run BEFORE the format validator (validate_output.py) as a
 soft gate: warns by default, blocks with --strict.
 
 Substring matching is case-insensitive on the lowercased provocation
-text. ASCII-only normalization is applied on the haystack so that
-"daemmerung" matches "Daemmerung" but not "Dammerung" -- the templates
-are written ASCII-only by convention (no umlauts), so this matches the
-voice rules as written.
+text. No diacritic transliteration is performed: the templates are
+written ASCII-only by convention (no umlauts), so "daemmerung" in a
+template matches "daemmerung" / "Daemmerung" in the output but does
+NOT match "Dammerung" or "Dämmerung". If a future template introduces
+non-ASCII tokens, this linter will need a transliteration step.
 
 Usage:
     lint_voice.py --templates-dir <path> --mode <single|chat> [--strict] <output-file>

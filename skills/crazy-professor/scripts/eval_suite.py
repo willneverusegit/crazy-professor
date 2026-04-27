@@ -211,8 +211,22 @@ def _first_finding_line(stderr: str) -> str:
     return stderr.strip().splitlines()[0][:200] if stderr.strip() else ""
 
 
+def render_telemetry_section(tele: dict) -> list[str]:
+    lines: list[str] = ["", "## Telemetry smoke (Stage B)", ""]
+    if not tele.get("available"):
+        lines.append(f"Skipped: {tele.get('reason', 'telemetry script not available')}")
+        return lines
+    if tele.get("passed"):
+        lines.append(f"PASS -- append + round-trip + summary "
+                     f"({'summary OK' if tele.get('summary_ok') else 'summary MISMATCH'})")
+        lines.append(f"- temp file: `{tele.get('tele_path')}`")
+    else:
+        lines.append(f"FAIL -- {tele.get('reason')}")
+    return lines
+
+
 def render_report(picker_results: dict, corpus_results: dict | None,
-                  meta: dict) -> str:
+                  meta: dict, telemetry_results: dict | None = None) -> str:
     lines: list[str] = []
     lines.append(f"# Eval Baseline {meta['date']}")
     lines.append("")
@@ -248,6 +262,8 @@ def render_report(picker_results: dict, corpus_results: dict | None,
         lines.append("## Corpus (Stage B linter sweep)")
         lines.append("")
         lines.append("Skipped (no corpus dir).")
+        if telemetry_results is not None:
+            lines.extend(render_telemetry_section(telemetry_results))
         return "\n".join(lines) + "\n"
 
     lines.append("")
@@ -286,7 +302,61 @@ def render_report(picker_results: dict, corpus_results: dict | None,
             lines.append(f"- **{arch}** / `{rec['file']}` ({rec['kind']}):")
             lines.append(f"  - {rec['first_finding']}")
 
+    if telemetry_results is not None:
+        lines.extend(render_telemetry_section(telemetry_results))
+
     return "\n".join(lines) + "\n"
+
+
+def stage_b_telemetry_smoke(telemetry_script: Path, tmp_dir: Path) -> dict:
+    """Append + read-back smoke test for telemetry.py (since v0.9.0)."""
+    if not telemetry_script.exists():
+        return {"available": False, "reason": f"telemetry script not found: {telemetry_script}"}
+    tele_path = tmp_dir / "telemetry-smoke.jsonl"
+    payload = {
+        "run_id": "eval-smoke--first-principles-jester--smoke",
+        "timestamp": "2026-04-27T00:00:00Z",
+        "mode": "single",
+        "topic_slug": "smoke",
+        "archetype": "first-principles-jester",
+        "word": "smoke",
+        "operator": "reversal",
+        "re_rolled": "no",
+        "distiller_used": False,
+        "round2_status": "n/a",
+        "time_to_finish_ms": 0,
+        "voice_cross_drift_hits": 0,
+        "lint_pass": True,
+    }
+    proc = subprocess.run(
+        [sys.executable, str(telemetry_script), "log",
+         "--path", str(tele_path),
+         "--json", json.dumps(payload)],
+        capture_output=True, text=True, timeout=10,
+    )
+    if proc.returncode != 0:
+        return {"available": True, "passed": False,
+                "reason": f"log exit {proc.returncode}: {proc.stderr.strip()[:160]}"}
+    if not tele_path.exists():
+        return {"available": True, "passed": False,
+                "reason": "telemetry file was not created"}
+    line = tele_path.read_text(encoding="utf-8").strip()
+    try:
+        rec = json.loads(line)
+    except json.JSONDecodeError as e:
+        return {"available": True, "passed": False,
+                "reason": f"appended line is not JSON: {e}"}
+    if rec.get("run_id") != payload["run_id"]:
+        return {"available": True, "passed": False,
+                "reason": "round-trip mismatch on run_id"}
+    sum_proc = subprocess.run(
+        [sys.executable, str(telemetry_script), "summary",
+         "--path", str(tele_path), "--last", "10"],
+        capture_output=True, text=True, timeout=10,
+    )
+    summary_ok = sum_proc.returncode == 0 and "records analyzed: 1" in sum_proc.stdout
+    return {"available": True, "passed": True, "summary_ok": summary_ok,
+            "tele_path": str(tele_path)}
 
 
 def stage_c_live_stub(runs: int) -> int:
@@ -316,6 +386,8 @@ def main() -> int:
     p.add_argument("--words", required=True, type=Path)
     p.add_argument("--retired", required=True, type=Path)
     p.add_argument("--corpus", type=Path, help="dir of single-mode outputs to lint")
+    p.add_argument("--telemetry", type=Path, default=None,
+                   help="path to telemetry.py for the smoke test (default: skip)")
     p.add_argument("--report-out", required=True, type=Path)
     p.add_argument("--picker-runs", type=int, default=50)
     p.add_argument("--strict-voice", action="store_true")
@@ -369,6 +441,12 @@ def main() -> int:
         print(f"warning: corpus dir not found: {args.corpus}",
               file=sys.stderr)
 
+    telemetry_results: dict | None = None
+    if args.telemetry:
+        print(f"running telemetry smoke test against {args.telemetry}...",
+              file=sys.stderr)
+        telemetry_results = stage_b_telemetry_smoke(args.telemetry, tmp_dir)
+
     meta = {
         "date": dt.date.today().isoformat(),
         "picker_runs": args.picker_runs,
@@ -376,7 +454,7 @@ def main() -> int:
         "strict_voice": args.strict_voice,
         "skill_version": args.skill_version,
     }
-    report = render_report(picker_results, corpus_results, meta)
+    report = render_report(picker_results, corpus_results, meta, telemetry_results)
     args.report_out.parent.mkdir(parents=True, exist_ok=True)
     args.report_out.write_text(report, encoding="utf-8")
     print(f"report written: {args.report_out}", file=sys.stderr)

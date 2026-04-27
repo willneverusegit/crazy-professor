@@ -11,7 +11,7 @@ Pfad: `.agent-memory/lab/crazy-professor/chat/YYYY-MM-DD-HHMM-<topic-slug>.md`
 ---
 skill: crazy-professor
 mode: chat
-version: 0.8.0
+version: 0.9.0
 timestamp: <ISO-8601 UTC>
 topic: "<user input, one line, unmodified>"
 archetypes: [first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown]

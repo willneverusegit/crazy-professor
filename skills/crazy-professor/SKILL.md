@@ -22,7 +22,7 @@ description: >
   "20 ideen", "destilliere", "crazy professor chat", "crazy chat".
 metadata:
   author: domes
-  version: '0.8.0'
+  version: '0.9.0'
   part-of: crazy-professor
   layer: divergence
   status: V1 + Chat-Mode
@@ -104,7 +104,7 @@ On each call, the skill:
 7. Appends a row to `field-notes.md` with picker values and review
    placeholders.
 
-Since v0.7.0 / v0.8.0, five helper scripts live at
+Since v0.7.0 / v0.8.0 / v0.9.0, seven helper scripts live at
 `<repo-root>/skills/crazy-professor/scripts/`:
 
 - `picker.py` (v0.7.0) — deterministic stochastic-element selection with
@@ -129,9 +129,18 @@ Since v0.7.0 / v0.8.0, five helper scripts live at
   directory of past outputs, writes a baseline report to
   `docs/eval-baseline-<date>.md`. Stage C (`--live`): hook for live
   skill invocations, currently a stub (live runs need Claude/Codex
-  orchestration).
+  orchestration). Also smoke-tests telemetry append since v0.9.0.
+- `telemetry.py` (v0.9.0) — append-only JSONL run log with schema
+  validation. Subcommands `log`, `summary`, `default-path`. Used in
+  Step 7b (single) and Step C7b (chat). Default path lives next to
+  `field-notes.md` in the lab corpus.
+- `patch_suggester.py` (v0.9.0) — patch-suggestion-loop. Every 10
+  single-mode runs, reads field-notes `kept`/`retire`/`voice-off`
+  markers and writes a non-automatic suggestion file to
+  `lab/crazy-professor/patches/YYYY-MM-DD-suggestion-N.md`. Suggestions
+  are NEVER applied automatically. Used in Step 7c.
 
-All five scripts are stdlib-only Python and optional. If Python is not
+All seven scripts are stdlib-only Python and optional. If Python is not
 available the prose mechanic still works (picker fallback is documented
 in operating-instructions). The validators degrade gracefully if not
 called -- they are pre-write checks, not gating runtime requirements.
@@ -242,7 +251,9 @@ crazy-professor/                              (repo root = plugin root)
             |-- validate_output.py            (v0.7.0)
             |-- lint_voice.py                 (v0.8.0, per-archetype lexicon)
             |-- lint_word_pool.py             (v0.8.0, pool integrity)
-            \-- eval_suite.py                 (v0.8.0, baseline + sweep)
+            |-- eval_suite.py                 (v0.8.0, baseline + sweep)
+            |-- telemetry.py                  (v0.9.0, JSONL run log)
+            \-- patch_suggester.py            (v0.9.0, every-10-runs hint)
 ```
 
 ## Output Target

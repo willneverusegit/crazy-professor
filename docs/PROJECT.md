@@ -14,7 +14,7 @@ Divergence-Generator als Claude-Code-Plugin: vier Archetypen produzieren strange
 
 ## Aktueller Stand
 
-v0.8.0 released 2026-04-27. Single-Run und Chat-Mode aktiv. Master-Plan-Phasen 1 (Vertragsbereinigung), 2 (Picker-Skript + field-notes-Schema + Output-Validator) und 3 (Linter-Trio + Eval-Suite) abgeschlossen. Vollständige stdlib-only Python-Toolchain in `scripts/`: picker, validate_output, lint_voice, lint_word_pool, eval_suite. Lexicon-Gate-Block in jedem Archetype-Template macht Voice-Drift-Erkennung maschinenlesbar. Eval-Baseline in `docs/eval-baseline-2026-04-27.md`. Phase 4 (Telemetrie), Phase 5 (Run-Planner), Phase 6 (Cross-Pollination + Compact) stehen an. Versions-Policy in `docs/VERSIONING.md`.
+v0.9.0 released 2026-04-27. Single-Run und Chat-Mode aktiv. Master-Plan-Phasen 1 (Vertragsbereinigung), 2 (Picker-Skript + field-notes-Schema + Output-Validator), 3 (Linter-Trio + Eval-Suite) und 4 (Telemetrie + Patch-Suggestion-Loop) abgeschlossen. Vollständige stdlib-only Python-Toolchain in `scripts/`: picker, validate_output, lint_voice, lint_word_pool, eval_suite, telemetry, patch_suggester. Lexicon-Gate-Block in jedem Archetype-Template macht Voice-Drift-Erkennung maschinenlesbar. Telemetrie-JSONL liegt neben `field-notes.md` in `.agent-memory/lab/crazy-professor/telemetry.jsonl`. Patch-Suggestion-Loop läuft alle 10 Single-Mode-Runs und schreibt Vorschläge nach `lab/.../patches/` (nicht-automatisch, Review-Gate). Phase 5 (Run-Planner), Phase 6 (Cross-Pollination + Compact) stehen an. Versions-Policy in `docs/VERSIONING.md`.
 
 ## Kernfaehigkeiten
 
@@ -31,7 +31,7 @@ Kurzfassung:
 
 - [x] Phase 2: Picker als Skript + field-notes-Schema (✅ v0.7.0)
 - [x] Phase 3: Linter-Trio (Word-Pool + Pflicht/Verbots-Vokabular pro Archetype) + Eval-Suite (✅ v0.8.0)
-- [ ] Phase 4: Telemetrie + Patch-Suggestion-Loop alle 10 Runs
+- [x] Phase 4: Telemetrie + Patch-Suggestion-Loop alle 10 Runs (✅ v0.9.0)
 - [ ] Phase 5: Run-Planner (Archetype-Selector + `--from-session` + `--dry-run`)
 - [ ] Phase 6: `--chat --compact`, `--strict-cross-pollination`, 4. PO-Operator (`wishful thinking`)
 - [ ] Phase 7 (optional): Single-File-HTML-Playground

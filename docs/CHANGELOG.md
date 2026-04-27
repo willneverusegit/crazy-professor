@@ -4,6 +4,19 @@ Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versio
 
 ---
 
+## [v0.9.0] [2026-04-27] Phase 4 — Telemetrie-Layer + Patch-Suggestion-Loop
+
+**Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil der Patch-Suggestion-Loop user-visible ist (alle 10 Runs erscheint ein neuer Vorschlags-File im Lab) und der Telemetrie-Layer eine neue maschinenlesbare Schicht hinzufügt, auf der zukünftige Phasen aufbauen. Master-Plan-Phase 4 abgeschlossen.
+
+- **4.1 Telemetrie-Layer** (`scripts/telemetry.py`, ~190 Zeilen, stdlib-only): append-only JSONL pro Run. Schema flat + stabil: `run_id, timestamp, mode, topic_slug, archetype/word/operator/re_rolled (single) oder picks[4] (chat), distiller_used, round2_status, time_to_finish_ms, voice_cross_drift_hits, lint_pass`. Schema-Validation gegen ungültige Modes/Round2-Status/picks-Länge. Subcommands `log` (mit `--json` oder `--stdin`), `summary` (`--last N`, default 50), `default-path`. Default-Pfad lebt neben `field-notes.md` im Lab-Corpus (`~/Desktop/.agent-memory/lab/crazy-professor/telemetry.jsonl`), override mit `--path`. 50-MB Hard-Cap (Rotation manuell). Smoke-Test: 2 Records (single + chat), Round-Trip + Aggregat OK; 4 Schema-Violation-Pfade fangen je richtig.
+- **4.2 Patch-Suggestion-Loop** (`scripts/patch_suggester.py`, ~230 Zeilen, stdlib-only): liest komplette field-notes.md Log-Tabelle, normalisiert Archetype/Word, identifiziert proven Words (`kept >=2`), retire candidates (`retire=yes >=1`), voice-drift hot spots und archetype-word-affinity. Modulo-Gate: triggert nur bei `single_runs % --every == 0` (default 10), `--force` für manuell. Schreibt Vorschlag nach `<field-notes-parent>/patches/YYYY-MM-DD-suggestion-N.md` (auto-incrementing seq). Vorschläge sind NIE automatisch angewandt — User reviewt und applied manuell. Smoke-Test gegen echte field-notes (15 single-runs): Modulo-Gate korrekt nicht-getriggert ohne Force; mit `--force` schreibt Vorschlag mit 3 voice-drift hot spots gefunden (alle 3 Blindtest-Faelle korrekt erkannt).
+- **4.3 SKILL.md + operating-instructions verdrahtet**: Helper-Skripte-Block in SKILL.md von 5 auf 7 erweitert mit Versionen + File-Layout-Diagram. Step 7b (Telemetry log) und Step 7c (optional patch-suggester) in operating-instructions.md eingebaut, jeweils mit Bash-Beispiel. Step C7b für Chat-Mode mit picks-Liste + round2_status-Mapping (`ok|skipped|failed`).
+- **4.4 Eval-Suite Telemetrie-Smoke-Test**: `eval_suite.py --telemetry <path>` führt Append+Round-Trip+Summary-Test durch und reportet im Baseline-Markdown unter "## Telemetry smoke (Stage B)". Smoke-getestet: PASS bei 5 Picker-Runs/Archetype + Telemetry-Test.
+- **4.5 lint_voice.py docstring-Drift behoben** (Quality-Fixer-Carry aus v0.8.0): "ASCII-only normalization" Claim präzisiert auf "no diacritic transliteration is performed" mit Hinweis, dass bei zukünftigen non-ASCII-Tokens eine Transliteration ergänzt werden muss.
+- **Versions-Bump auf 0.9.0** in 8 frontmatter Files (`plugin.json`, SKILL.md, output-template.md, chat-output-template.md, chat-mode-flow.md frontmatter+example, chat-curator.md, chat-round-1-wrapper.md, chat-round-2-wrapper.md). PROJECT.md "Aktueller Stand" + "Offene Baustellen" updated. CAPABILITIES.md 2 Items von "geplant" auf "aktiv" umgestellt.
+
+---
+
 ## [v0.8.0] [2026-04-27] Phase 3 — Linter-Trio + Eval-Suite + Lexicon-Gates
 
 **Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil die Eval-Suite Pass-Rate als Gate für Prompt-Edits etabliert (workflow-changing) und das Lexicon-Gate-Block in jedem Template ein neues maschinenlesbares Vertragselement ist. Master-Plan-Phase 3 abgeschlossen.
