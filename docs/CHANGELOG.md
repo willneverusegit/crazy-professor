@@ -4,6 +4,18 @@ Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versio
 
 ---
 
+## [v0.7.0] [2026-04-27] Phase 2 — Picker-Skript + field-notes-Schema + Output-Validator
+
+**Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil Picker-Skript als Pre-Tool-Step die Skill-Mechanik strukturell ändert. Master-Plan-Phase 2 abgeschlossen.
+
+- **2.2 field-notes-Schema**: `resources/field-notes-schema.md` legt die canonical Spalten-Spec fest (12 Spalten, append-only Log-Tabelle, Status-Block-Konventionen). `resources/field-notes-init.md` ist das Init-Template, das der Picker bei fehlender field-notes.md ins Ziel-Projekt kopiert.
+- **2.1 Picker-Skript** (`scripts/picker.py`, 252 Zeilen, stdlib-only Python): liest die letzten 10 Log-Zeilen von field-notes.md, führt Picker (mod-4 archetype, microsecond-based word, mod-3 operator) aus, wendet die Variation-Guard-Logik aus Step 2b an (archetype-streak ≥3 re-roll, word-window dedup), gibt JSON `{archetype, word, operator, re_rolled, timestamp, mode}` auf stdout. Modi: `--mode single` (default), `--mode chat` (4 parallele Picks). Optionen: `--init-template`, `--force-archetype`, `--force-timestamp`. Smoke-getestet gegen die echte Desktop-field-notes (10 Rows, korrekte Anti-Streak-Erkennung), Chat-Mode (4 unterschiedliche Worte/Operatoren), Force-Archetype, Init-on-missing-file.
+- **2.3 Output-Validator** (`scripts/validate_output.py`, ~200 Zeilen, stdlib-only Python): prüft Single-Run- und Chat-Mode-Output auf Format-Drift. Single: Frontmatter, Divergence-Banner, exakt 10 Provokationen mit Pattern `<text> -- [cost: <level>] -- anchor: <text>` (akzeptiert `--`, em-dash `—`, en-dash `–`), Next-Experiment, Self-Flag mit ≥3 Checkboxes. Chat: Round 1/2/3 vorhanden, Round 3 mit exakt 5 Items pro Archetype-Subsection, Top-3 mit genau 3 Items. Smoke-getestet gegen 4 echte Output-Files: pass auf 2026-04-23-Outputs (post-Format-Stabilisierung) und Chat-Mode-Output, fail (korrekt) auf 2026-04-22-Outputs (vor Format-Stabilisierung — diese hatten das Anchor-Pattern noch nicht).
+- **SKILL.md + operating-instructions verdrahtet**: Step 2 dokumentiert Picker als preferred Path (Python-Call mit JSON-Parse), Fallback-Path (Prosa-Mechanik) bleibt für Python-fehlt-Umgebungen erhalten. Step 6 dokumentiert Validator als Pre-Write-Check.
+- Skripte sind optional. Plugin-Repo bleibt vollständig nutzbar ohne Python.
+
+---
+
 ## [v0.6.0] [2026-04-27] Phase 1 — Vertragsbereinigung & Quick-Wins
 
 **Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil Topic-Resolution-Vertrag breaking change ist (`--chat` ohne Topic wird jetzt explizit abgelehnt; vorher implizites Verhalten). Master-Plan-Phase 1 abgeschlossen.

@@ -12,8 +12,9 @@
 | Radagast-Brown Archetype | aktiv | 2026-04-23 | Vierter Archetype, schuetzt nuetzlich-nutzlose System-Teile gegen Optimierung |
 | Codex-Round-3-Distiller | aktiv | 2026-04-23 | `codex:codex-rescue` als Round-3-Juror in Chat-Mode |
 | Claude-Distiller-Fallback | aktiv | 2026-04-23 | Falls Codex nicht erreichbar |
-| Picker-Skript (deterministisch) | geplant | — | Phase 2: Python/Bash-Skript ersetzt Prosa-Mechanik |
-| field-notes-Schema im Repo | geplant | — | Phase 2: Beispieldatei + Spalten-Definition |
+| Picker-Skript (deterministisch) | aktiv | 2026-04-27 (v0.7.0) | Python-Skript `scripts/picker.py` (stdlib-only). Modi: `--mode single` / `--mode chat`. Liest field-notes.md, wendet Variation-Guard an, gibt JSON. Optional als Pre-Tool-Step. |
+| field-notes-Schema im Repo | aktiv | 2026-04-27 (v0.7.0) | `resources/field-notes-schema.md` (canonical Spalten-Spec, 12 Spalten, append-only) + `resources/field-notes-init.md` (Init-Template, das Picker bei fehlender field-notes ins Ziel-Projekt kopiert) |
+| Output-Validator | aktiv | 2026-04-27 (v0.7.0) | Python-Skript `scripts/validate_output.py` (stdlib-only). Prüft Format-Drift in Single- und Chat-Mode-Output. Pre-Write-Check. |
 | Word-Pool-Linter | geplant | — | Phase 3: Doubletten/Whitespace/Case-Inkonsistenzen |
 | Pflicht-/Verbots-Vokabel-Linter | geplant | — | Phase 3: pro Archetype, blockiert Voice-Drift |
 | Eval-Suite | geplant | — | Phase 3: 50-100 Sample-Runs gegen Pflicht/Verbot/Schema |

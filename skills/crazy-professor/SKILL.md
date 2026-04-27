@@ -22,7 +22,7 @@ description: >
   "20 ideen", "destilliere", "crazy professor chat", "crazy chat".
 metadata:
   author: domes
-  version: '0.6.0'
+  version: '0.7.0'
   part-of: crazy-professor
   layer: divergence
   status: V1 + Chat-Mode
@@ -103,6 +103,19 @@ On each call, the skill:
    `.agent-memory/lab/crazy-professor/YYYY-MM-DD-HHMM-<topic-slug>.md`.
 7. Appends a row to `field-notes.md` with picker values and review
    placeholders.
+
+Since v0.7.0, two helper scripts live at
+`<repo-root>/skills/crazy-professor/scripts/`:
+
+- `picker.py` — deterministic stochastic-element selection with built-in
+  variation-guard. Replaces the prose mod-4 mechanic with a callable
+  command. Output is JSON on stdout. Used as the preferred path in
+  Step 2/2b.
+- `validate_output.py` — format-drift detector for both single and
+  chat-mode outputs. Used as a pre-write check in Step 6.
+
+Both scripts are stdlib-only Python and optional. If Python is not
+available the prose mechanic still works.
 
 The full step-by-step including Variation-Guard logic, Chat-Mode steps
 C1-C8, and the topic-resolution contract lives in

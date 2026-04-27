@@ -33,6 +33,29 @@ contract (uniform across README.md, commands/crazy.md, and SKILL.md):
 
 **Step 2: Pick stochastic elements.**
 
+**Preferred path (since v0.7.0):** call the picker script. It encapsulates
+the mod-4 archetype pick, the word draw, the operator pick, AND the
+variation-guard from Step 2b in one deterministic call:
+
+```bash
+python <repo-root>/skills/crazy-professor/scripts/picker.py \
+  --field-notes <target-project>/.agent-memory/lab/crazy-professor/field-notes.md \
+  --words <repo-root>/skills/crazy-professor/resources/provocation-words.txt \
+  --retired <repo-root>/skills/crazy-professor/resources/retired-words.txt \
+  --init-template <repo-root>/skills/crazy-professor/resources/field-notes-init.md \
+  --mode single
+```
+
+For chat-mode: `--mode chat` returns four picks (one per archetype) in
+a single JSON object.
+
+The script writes one JSON object to stdout containing `archetype`,
+`word`, `operator`, `re_rolled`, `timestamp`, `mode`. Parse it and
+proceed with Step 3. The variation-guard from Step 2b is already
+applied inside the script — skip Step 2b in this path.
+
+**Fallback path (if Python is unavailable):**
+
 - Archetype: take current UTC timestamp minute mod 4 (0=jester, 1=librarian,
   2=alchemist, 3=radagast-brown). This is deterministic-within-minute,
   random-across-minutes. All four archetypes active since 2026-04-23
@@ -46,6 +69,7 @@ contract (uniform across README.md, commands/crazy.md, and SKILL.md):
   `paradox tax`, `false-bottom`) — both formats are valid.
 - PO-operator: take timestamp second mod 3 (0=reversal, 1=exaggeration,
   2=escape).
+- Then apply Step 2b manually.
 
 **Step 2b: Variation guard (field-notes.md as forced input).**
 
@@ -97,6 +121,23 @@ structure defined in
 `<repo-root>/skills/crazy-professor/resources/output-template.md`.
 Create the directory `.agent-memory/lab/crazy-professor/` (in the target
 project, not the plugin repo) if it does not exist.
+
+**Pre-write check (since v0.7.0):** before persisting, run the validator
+on the in-memory text. If it exits non-zero, fix the format drift and
+retry. Do NOT write a drifted output to disk.
+
+```bash
+python <repo-root>/skills/crazy-professor/scripts/validate_output.py \
+  --mode single <output-file>
+```
+
+For chat-mode use `--mode chat`. Validator checks: frontmatter
+completeness, divergence-warning banner, exact 10-provocation count
+with the canonical line shape (`<text> -- [cost: <level>] -- anchor:
+<text>`, supporting `--`, `—`, or `–`), Next-Experiment section, and
+Self-Flag checkboxes. For chat: all three rounds present, exactly 5
+items per archetype in Round 3, exactly 3 Top-3 items, Next-Experiment
+section.
 
 **Step 7: Append a line to `.agent-memory/lab/crazy-professor/field-notes.md`**
 as one Markdown table row that matches the existing table columns.

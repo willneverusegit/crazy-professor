@@ -14,7 +14,7 @@ Divergence-Generator als Claude-Code-Plugin: vier Archetypen produzieren strange
 
 ## Aktueller Stand
 
-v0.6.0 released 2026-04-27. Single-Run und Chat-Mode aktiv. Codex-Smoke-Test 2026-04-26 sauber. Master-Plan-Phase 1 (Vertragsbereinigung & Quick-Wins) abgeschlossen — Topic-Resolution-Vertrag scharf, `--chat` ohne Topic wird abgelehnt, SKILL.md auf Progressive Disclosure mit Operating-Instructions + Hard Rules in `references/`, Pfad-Konvention `<repo-root>/...`. Picker (Phase 2), Linter-Trio (Phase 3), Telemetrie (Phase 4), Run-Planner (Phase 5) stehen an. Versions-Policy in `docs/VERSIONING.md`.
+v0.7.0 released 2026-04-27. Single-Run und Chat-Mode aktiv. Master-Plan-Phasen 1 (Vertragsbereinigung) und 2 (Picker-Skript + field-notes-Schema + Output-Validator) abgeschlossen. Picker als deterministisches Python-Skript (`scripts/picker.py`) und Output-Validator (`scripts/validate_output.py`) ergänzen die Prosa-Mechanik in SKILL.md, beide stdlib-only und optional. Phase 3 (Linter-Trio + Eval-Suite), Phase 4 (Telemetrie), Phase 5 (Run-Planner), Phase 6 (Cross-Pollination + Compact) stehen an. Versions-Policy in `docs/VERSIONING.md`.
 
 ## Kernfaehigkeiten
 

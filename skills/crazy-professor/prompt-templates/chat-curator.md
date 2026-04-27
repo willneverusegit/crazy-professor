@@ -1,7 +1,7 @@
 ---
 title: Chat-Mode Runde-3 Codex-Destillator Prompt
 purpose: Codex bekommt alle Runde-1- und Runde-2-Provokationen und destilliert auf exakt 20 Ideen, 5 pro Archetype.
-version: 0.6.0
+version: 0.7.0
 ---
 
 # Codex-Destillator Prompt (Runde 3)
