@@ -157,6 +157,31 @@ def parse_r2_md(text: str) -> dict[str, list[dict]]:
     return sections
 
 
+def check_ref_resolution(item: dict, r1: dict) -> tuple[str, str] | None:
+    """Check 2: Ref-Resolution. Returns (severity, reason) or None.
+    Assumes Check 1 already passed (marker is set). Verifies the marker's
+    archetype + idx points to an existing R1 item.
+    """
+    arch = item.get("ref_archetype")
+    idx = item.get("ref_idx")
+    if arch is None or idx is None:
+        return ("error",
+                "ref does not match '<archetype> #<int>' format")
+    if not (1 <= idx <= 5):
+        return ("error",
+                f"ref idx {idx} out of range 1..5")
+    archetype_section = r1.get(arch, {})
+    if isinstance(archetype_section, dict):
+        if idx not in archetype_section and str(idx) not in archetype_section:
+            return ("error",
+                    f"ref does not resolve to existing R1 item ({arch} #{idx} not present)")
+    elif isinstance(archetype_section, list):
+        if idx > len(archetype_section):
+            return ("error",
+                    f"ref does not resolve to existing R1 item ({arch} #{idx} not present)")
+    return None
+
+
 def check_marker(item: dict) -> tuple[str, str] | None:
     """Check 1: Marker-Existence. Return (severity, reason) or None."""
     if not item.get("marker"):
@@ -207,7 +232,19 @@ def main() -> int:
                     "reason": reason,
                 })
                 continue
-            # Check 2 + 3 are added in Tasks 6 and 7. For now, marker-only.
+
+            check = check_ref_resolution(item, r1)
+            if check:
+                severity, reason = check
+                findings.append({
+                    "archetype": archetype,
+                    "idx": item.get("idx"),
+                    "ref": item.get("ref"),
+                    "severity": severity,
+                    "reason": reason,
+                })
+                continue
+            # Check 3 (Token-Overlap) is added in Task 7. For now, marker + ref-resolution.
 
     by_severity: dict[str, int] = {}
     for f in findings:
