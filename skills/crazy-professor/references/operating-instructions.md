@@ -47,6 +47,7 @@ contract (uniform across README.md, commands/crazy.md, and SKILL.md):
   retains its own `--chat --dry-run-round1` flag (different mechanism,
   unaffected). Combining `--chat --dry-run` is rejected at the command
   layer (commands/crazy.md).
+- **Single-run with `--playground` (since v0.12.0, single-run only and standalone):** instead of parsing a topic and generating provocations, run `python <repo-root>/skills/crazy-professor/scripts/build_playground.py` with the active resource files (`provocation-words.txt`, `retired-words.txt`, `po-operators.md`) and the field-notes path (local `.agent-memory/lab/crazy-professor/field-notes.md` first, Desktop-fallback `~/Desktop/.agent-memory/lab/crazy-professor/field-notes.md` if local missing). Pass `--version` from `.claude-plugin/plugin.json`. The script writes/refreshes `<repo-root>/skills/crazy-professor/playground/index.html`. Then open the HTML file via the OS's default browser handler (Python `webbrowser.open()`, fallback: print `Open this file manually: file://<absolute-path>`). No topic argument is parsed — the playground accepts the topic via its input field. The reject-matrix is: `--playground` rejects in combination with `--chat`, `--from-session`, `--dry-run`, `--compact`, or `--strict-cross-pollination`. Reject message: `--playground is single-run only and standalone (no --chat/--from-session/--dry-run/--compact/--strict-cross-pollination combinations).`
 
 **Step 2a: Run Planner -- archetype recommendation (since v0.10.0).**
 
