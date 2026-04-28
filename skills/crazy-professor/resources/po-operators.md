@@ -4,9 +4,9 @@ PO stands for "Provocation Operation" -- a deliberate destabilization of
 accepted thinking patterns. The operator signals that what follows is
 not a proposal but a provocation intended to move thinking sideways.
 
-V1 uses three of de Bono's six operators. The remaining three (wishful
-thinking, distortion, arising) are reserved for V2 to keep the initial
-space focused.
+V1 used three of de Bono's six operators. v0.11.0 activates the 4th
+operator (wishful thinking) as a controlled field-test. The remaining two
+(distortion, arising) are reserved for V2 to keep the space focused.
 
 ## Reversal
 
@@ -36,7 +36,25 @@ Example scaffold:
   "Normally [subject] has [feature]. What if [feature] is gone?"
   "Normally [process] requires [input]. What if [input] does not exist?"
 
-## Rules for All Three
+## Wishful Thinking
+
+Postulate something the system explicitly cannot do, then observe what
+constraint that breaks. Not for the wish itself -- for what the
+impossibility reveals about the boundary. The operator names a desire
+that is materially blocked, then forces thinking sideways into "what
+if the block were removed".
+
+Example scaffold:
+  "Wishful thinking: <X> happens without <prerequisite>."
+  "Wishful thinking: <subject> can <verb> without <constraint>."
+
+Distinction from Reversal: reversal swaps an existing relationship.
+Wishful thinking removes a precondition that gates the action entirely.
+Distinction from Escape: escape removes a feature; wishful thinking
+removes a prerequisite that the system normally requires before the
+feature can run.
+
+## Rules for All Four
 
 - The provocation is not a solution. It is a movement-generator. If the
   provocation directly describes a usable solution, it is too tame.
