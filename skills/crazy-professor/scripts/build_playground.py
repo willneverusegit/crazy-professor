@@ -259,6 +259,142 @@ noscript {
 }
 """
 
+JS_BLOCK = """
+const state = {
+  topic: "",
+  archetype: null,
+  word: null,
+  operator: null,
+};
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function rollAll() {
+  state.archetype = pickRandom(ARCHETYPES);
+  state.word = pickRandom(WORDS);
+  state.operator = pickRandom(OPERATORS);
+  updateAll();
+}
+
+function rerollWord() {
+  state.word = pickRandom(WORDS);
+  updateAll();
+}
+
+function rerollOp() {
+  state.operator = pickRandom(OPERATORS);
+  updateAll();
+}
+
+function pickArchetype(value) {
+  if (value) {
+    state.archetype = value;
+    updateAll();
+  }
+}
+
+function escapeTopic(t) {
+  return t.replace(/\\\\/g, "\\\\\\\\").replace(/"/g, '\\\\"').replace(/\\n/g, " ").trim();
+}
+
+function updatePrompt() {
+  const out = document.getElementById("prompt-output");
+  const t = state.topic.trim();
+  if (!t || !state.archetype || !state.word || !state.operator) {
+    out.textContent = "(enter a topic above and roll the picker)";
+    out.classList.remove("has-prompt");
+    return;
+  }
+  const escaped = escapeTopic(t);
+  out.textContent = `/crazy "${escaped}" --force-archetype ${state.archetype} --force-word ${state.word} --force-operator ${state.operator}`;
+  out.classList.add("has-prompt");
+}
+
+function renderCockpit() {
+  const archCell = document.getElementById("archetype-cell");
+  const wordCell = document.getElementById("word-cell");
+  const opCell = document.getElementById("op-cell");
+  archCell.querySelector(".pick").textContent = state.archetype || "(roll to pick)";
+  archCell.classList.toggle("empty", !state.archetype);
+  wordCell.querySelector(".pick").textContent = state.word || "(roll to pick)";
+  wordCell.classList.toggle("empty", !state.word);
+  opCell.querySelector(".pick").textContent = state.operator || "(roll to pick)";
+  opCell.classList.toggle("empty", !state.operator);
+}
+
+function streakInfo() {
+  if (!FIELD_NOTES_RECENT.length) {
+    return { lastArchetype: null, lastWord: null, streak: 0 };
+  }
+  const reversed = [...FIELD_NOTES_RECENT].reverse();
+  const lastArchetype = reversed[0].archetype;
+  const lastWord = reversed[0].word;
+  let streak = 0;
+  for (const r of reversed) {
+    if (r.archetype === lastArchetype) streak++;
+    else break;
+  }
+  return { lastArchetype, lastWord, streak };
+}
+
+function renderFooter() {
+  const footer = document.getElementById("field-notes-footer");
+  if (!FIELD_NOTES_RECENT.length) {
+    footer.innerHTML = '<div class="label">field-notes context</div><div class="row">(no recent runs)</div>';
+    return;
+  }
+  const { lastArchetype, lastWord, streak } = streakInfo();
+  let html = '<div class="label">field-notes context (last ' + FIELD_NOTES_RECENT.length + ' rows)</div>';
+  html += '<div class="row">last archetype: ' + lastArchetype + ' (streak: ' + streak + ')</div>';
+  html += '<div class="row">last word: ' + lastWord + '</div>';
+  if (streak >= 3 && state.archetype === lastArchetype) {
+    html += '<div class="row warn">' + state.archetype + ' would be streak ' + (streak + 1) + ' -- CLI variation-guard will re-roll</div>';
+  }
+  footer.innerHTML = html;
+}
+
+function updateAll() {
+  renderCockpit();
+  updatePrompt();
+  renderFooter();
+}
+
+async function copyPrompt() {
+  const out = document.getElementById("prompt-output");
+  if (!out.classList.contains("has-prompt")) return;
+  const fb = document.getElementById("copy-feedback");
+  try {
+    await navigator.clipboard.writeText(out.textContent);
+    fb.textContent = "Copied!";
+    fb.classList.add("show");
+    setTimeout(function () { fb.classList.remove("show"); }, 1500);
+  } catch (err) {
+    alert("Clipboard unavailable -- copy the prompt above manually.");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const topicInput = document.getElementById("topic");
+  topicInput.addEventListener("input", function (e) {
+    state.topic = e.target.value;
+    updatePrompt();
+  });
+  document.getElementById("roll-all").addEventListener("click", rollAll);
+  document.getElementById("reroll-word").addEventListener("click", rerollWord);
+  document.getElementById("reroll-op").addEventListener("click", rerollOp);
+  const archSelect = document.getElementById("archetype-pick");
+  archSelect.addEventListener("change", function (e) {
+    pickArchetype(e.target.value);
+    e.target.value = "";
+  });
+  document.getElementById("copy").addEventListener("click", copyPrompt);
+  topicInput.focus();
+  updateAll();
+});
+"""
+
 
 def read_word_pool(words_path: Path, retired_path: Path) -> list[str]:
     """Mirror picker.py:read_word_pool() exactly. Active = pool minus retired."""
