@@ -25,7 +25,7 @@ from pathlib import Path
 
 ARCHETYPES = ("first-principles-jester", "labyrinth-librarian",
               "systems-alchemist", "radagast-brown")
-PO_OPERATORS = ("reversal", "exaggeration", "escape")
+PO_OPERATORS = ("reversal", "exaggeration", "escape", "wishful-thinking")
 
 # Single-run provocation line shape:
 # <n>. <text> -- [cost: <level>] -- anchor: <text>
