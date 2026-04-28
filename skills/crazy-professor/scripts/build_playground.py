@@ -38,6 +38,227 @@ ARCHETYPES = (
 )
 DEFAULT_OPERATORS = ("reversal", "exaggeration", "escape", "wishful-thinking")
 
+CSS_BLOCK = """
+:root {
+  --bg: #0a0a0a;
+  --bg-card: #161616;
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #d4d4d4;
+  --text-dim: #888;
+  --accent-archetype: #7ec0ee;
+  --accent-word: #9ec587;
+  --accent-operator: #e0af68;
+  --accent-warn: #ff9a3c;
+  --button: #2a2a2a;
+  --button-hover: #383838;
+  --button-primary: #7ec0ee;
+  --button-primary-text: #0a0a0a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+.header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 600;
+}
+
+.header .version {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#topic {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+}
+
+#topic:focus {
+  outline: none;
+  border-color: var(--accent-archetype);
+}
+
+.cockpit {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 540px) {
+  .cockpit { grid-template-columns: 1fr; }
+}
+
+.cell {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.cell .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.cell .pick {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cell.archetype { border-color: rgba(126, 192, 238, 0.3); }
+.cell.archetype .pick { color: var(--accent-archetype); }
+
+.cell.word { border-color: rgba(158, 197, 135, 0.3); }
+.cell.word .pick { color: var(--accent-word); }
+
+.cell.operator { border-color: rgba(224, 175, 104, 0.3); }
+.cell.operator .pick { color: var(--accent-operator); }
+
+.cell.empty .pick {
+  color: var(--text-dim);
+  font-style: italic;
+  font-weight: 400;
+}
+
+button, select {
+  background: var(--button);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+button:hover, select:hover { background: var(--button-hover); }
+
+button.primary {
+  background: var(--button-primary);
+  color: var(--button-primary-text);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px 16px;
+}
+
+button.primary:hover { background: #95cef0; }
+
+#roll-all { width: 100%; }
+
+.reroll-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.reroll-row button, .reroll-row select { font-size: 12px; padding: 8px 10px; }
+
+#prompt-output {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+  min-height: 64px;
+}
+
+#prompt-output.has-prompt { color: var(--text); }
+
+#copy-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#copy { flex: 1; }
+
+#copy-feedback {
+  color: var(--accent-word);
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+#copy-feedback.show { opacity: 1; }
+
+.field-notes-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  line-height: 1.6;
+}
+
+.field-notes-footer .label {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 10px;
+  margin-bottom: 6px;
+  color: var(--text-dim);
+}
+
+.field-notes-footer .row { display: block; }
+
+.field-notes-footer .warn {
+  color: var(--accent-warn);
+  margin-top: 4px;
+}
+
+noscript {
+  display: block;
+  background: rgba(255, 154, 60, 0.1);
+  border: 1px solid var(--accent-warn);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 16px 24px;
+  color: var(--accent-warn);
+  font-size: 13px;
+}
+"""
+
 
 def read_word_pool(words_path: Path, retired_path: Path) -> list[str]:
     """Mirror picker.py:read_word_pool() exactly. Active = pool minus retired."""
