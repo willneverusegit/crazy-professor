@@ -154,6 +154,32 @@ def validate_single(text: str) -> list[str]:
     return issues
 
 
+def section_order(body: str) -> list[str]:
+    """Return the list of major chat-mode section labels in the order they appear.
+    Skips section headers that aren't part of the chat-mode flow.
+    """
+    labels = []
+    targets = [
+        ("Round 1", r"^Round 1"),
+        ("Round 2", r"^Round 2"),
+        ("Round 3", r"^Round 3"),
+        ("Top-3", r"^Top-3"),
+        ("Next Experiment", r"^Next Experiment"),
+        ("Self-Flag", r"^Self-Flag"),
+    ]
+    lines = body.splitlines()
+    for i, line in enumerate(lines):
+        m = HEADING_RE.match(line)
+        if not m:
+            continue
+        text = m.group(2)
+        for label, pattern in targets:
+            if re.match(pattern, text):
+                labels.append(label)
+                break
+    return labels
+
+
 def validate_chat(text: str) -> list[str]:
     issues: list[str] = []
     fm, body = split_frontmatter(text)
@@ -171,11 +197,39 @@ def validate_chat(text: str) -> list[str]:
 
     check_divergence_banner(body, issues)
 
-    # Three rounds present
+    compact_str = (fm.get("compact") or "").strip().lower()
+    compact = compact_str == "true"
+
+    # Three rounds present (R1+R2 may live inside a <details> in compact mode)
     for round_name in ("Round 1", "Round 2", "Round 3"):
         start, _ = find_section_lines(body, rf"^{round_name}")
         if start < 0:
             issues.append(f"missing '## {round_name}' section")
+
+    # Compact-mode order check: Round 3, Top-3, Next Experiment, Self-Flag
+    # come BEFORE Round 1 and Round 2.
+    order = section_order(body)
+    if compact:
+        try:
+            r1_idx = order.index("Round 1")
+        except ValueError:
+            r1_idx = 10**9  # not found -- separate issue already raised above
+        for primary in ("Round 3", "Top-3", "Next Experiment", "Self-Flag"):
+            if primary in order and order.index(primary) > r1_idx:
+                issues.append(
+                    f"compact-mode order violation: '{primary}' must appear "
+                    f"before 'Round 1' but came later"
+                )
+    else:
+        try:
+            r1_idx = order.index("Round 1")
+            r3_idx = order.index("Round 3")
+            if r1_idx > r3_idx:
+                issues.append(
+                    "normal-mode order violation: 'Round 1' must precede 'Round 3'"
+                )
+        except ValueError:
+            pass
 
     # Round 3: each archetype subsection has exactly 5 numbered items
     r3_start, r3_end = find_section_lines(body, r"^Round 3")
