@@ -22,7 +22,7 @@ description: >
   "20 ideen", "destilliere", "crazy professor chat", "crazy chat".
 metadata:
   author: domes
-  version: '0.9.0'
+  version: '0.10.0'
   part-of: crazy-professor
   layer: divergence
   status: V1 + Chat-Mode

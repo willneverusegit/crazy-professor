@@ -14,7 +14,7 @@ Divergence-Generator als Claude-Code-Plugin: vier Archetypen produzieren strange
 
 ## Aktueller Stand
 
-v0.9.0 released 2026-04-27. Single-Run und Chat-Mode aktiv. Master-Plan-Phasen 1 (Vertragsbereinigung), 2 (Picker-Skript + field-notes-Schema + Output-Validator), 3 (Linter-Trio + Eval-Suite) und 4 (Telemetrie + Patch-Suggestion-Loop) abgeschlossen. Vollständige stdlib-only Python-Toolchain in `scripts/`: picker, validate_output, lint_voice, lint_word_pool, eval_suite, telemetry, patch_suggester. Lexicon-Gate-Block in jedem Archetype-Template macht Voice-Drift-Erkennung maschinenlesbar. Telemetrie-JSONL liegt neben `field-notes.md` in `.agent-memory/lab/crazy-professor/telemetry.jsonl`. Patch-Suggestion-Loop läuft alle 10 Single-Mode-Runs und schreibt Vorschläge nach `lab/.../patches/` (nicht-automatisch, Review-Gate). Phase 5 (Run-Planner), Phase 6 (Cross-Pollination + Compact) stehen an. Versions-Policy in `docs/VERSIONING.md`.
+v0.10.0 released 2026-04-28. Single-Run und Chat-Mode aktiv. Master-Plan-Phasen 1-5 abgeschlossen: 1 (Vertragsbereinigung), 2 (Picker-Skript + field-notes-Schema + Output-Validator), 3 (Linter-Trio + Eval-Suite), 4 (Telemetrie + Patch-Suggestion-Loop), 5 (Run-Planner: topic-aware Archetype-Selector + `--from-session` + `--dry-run`). Vollständige stdlib-only Python-Toolchain in `scripts/`: picker, validate_output, lint_voice, lint_word_pool, eval_suite, telemetry, patch_suggester, run_planner. Run Planner schichtet sich vor den Picker: Selector schlaegt aus Topic-Keywords einen Archetype vor, Picker setzt ihn via `--force-archetype`, Variation-Guard gewinnt aber bei Streaks. `--from-session` zieht Topic-Kandidaten aus session-summary.md (lokal + Desktop). `--dry-run` zeigt Picker-Output ohne Generation, side-effect-frei. Phase 6 (Cross-Pollination + Compact) steht an. Versions-Policy in `docs/VERSIONING.md`.
 
 ## Kernfaehigkeiten
 
@@ -32,7 +32,7 @@ Kurzfassung:
 - [x] Phase 2: Picker als Skript + field-notes-Schema (✅ v0.7.0)
 - [x] Phase 3: Linter-Trio (Word-Pool + Pflicht/Verbots-Vokabular pro Archetype) + Eval-Suite (✅ v0.8.0)
 - [x] Phase 4: Telemetrie + Patch-Suggestion-Loop alle 10 Runs (✅ v0.9.0)
-- [ ] Phase 5: Run-Planner (Archetype-Selector + `--from-session` + `--dry-run`)
+- [x] Phase 5: Run-Planner (Archetype-Selector + `--from-session` + `--dry-run`) (✅ v0.10.0)
 - [ ] Phase 6: `--chat --compact`, `--strict-cross-pollination`, 4. PO-Operator (`wishful thinking`)
 - [ ] Phase 7 (optional): Single-File-HTML-Playground
 - [ ] Phase 8 (optional, RISIKO): Telegram-Bridge

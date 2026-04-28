@@ -2,7 +2,7 @@
 title: Chat-Mode Runde-1 Prompt-Wrapper
 purpose: Wird um den Standard-Archetype-Prompt herum gelegt, wenn Chat-Mode Runde 1 laeuft.
 applies_to: [first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown]
-version: 0.9.0
+version: 0.10.0
 ---
 
 # Runde-1 Wrapper (Chat-Mode)

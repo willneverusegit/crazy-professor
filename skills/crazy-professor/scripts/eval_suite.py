@@ -225,8 +225,30 @@ def render_telemetry_section(tele: dict) -> list[str]:
     return lines
 
 
+def render_run_planner_section(rp: dict) -> list[str]:
+    lines: list[str] = ["", "## Run Planner smoke (Stage B)", ""]
+    if not rp.get("available"):
+        lines.append(f"Skipped: {rp.get('reason', 'run_planner script not available')}")
+        return lines
+    if rp.get("passed"):
+        lines.append(f"PASS -- {rp['passes']}/{rp['total']} asserts")
+    else:
+        first = rp.get("first_fail")
+        first_label = first[0] if first else "unknown"
+        first_detail = first[1] if first else ""
+        lines.append(f"FAIL -- {rp['passes']}/{rp['total']} asserts; "
+                     f"first failure: {first_label}"
+                     + (f" ({first_detail})" if first_detail else ""))
+    lines.append("")
+    for label, ok in rp.get("asserts", []):
+        marker = "ok" if ok else "FAIL"
+        lines.append(f"- {marker}: {label}")
+    return lines
+
+
 def render_report(picker_results: dict, corpus_results: dict | None,
-                  meta: dict, telemetry_results: dict | None = None) -> str:
+                  meta: dict, telemetry_results: dict | None = None,
+                  run_planner_results: dict | None = None) -> str:
     lines: list[str] = []
     lines.append(f"# Eval Baseline {meta['date']}")
     lines.append("")
@@ -264,6 +286,8 @@ def render_report(picker_results: dict, corpus_results: dict | None,
         lines.append("Skipped (no corpus dir).")
         if telemetry_results is not None:
             lines.extend(render_telemetry_section(telemetry_results))
+        if run_planner_results is not None:
+            lines.extend(render_run_planner_section(run_planner_results))
         return "\n".join(lines) + "\n"
 
     lines.append("")
@@ -304,6 +328,8 @@ def render_report(picker_results: dict, corpus_results: dict | None,
 
     if telemetry_results is not None:
         lines.extend(render_telemetry_section(telemetry_results))
+    if run_planner_results is not None:
+        lines.extend(render_run_planner_section(run_planner_results))
 
     return "\n".join(lines) + "\n"
 
@@ -359,6 +385,201 @@ def stage_b_telemetry_smoke(telemetry_script: Path, tmp_dir: Path) -> dict:
             "tele_path": str(tele_path)}
 
 
+def stage_b_run_planner_smoke(run_planner_script: Path,
+                              keywords_path: Path,
+                              tmp_dir: Path) -> dict:
+    """Eight-assert smoke test for run_planner.py (since v0.10.0)."""
+    if not run_planner_script.exists():
+        return {"available": False,
+                "reason": f"run_planner script not found: {run_planner_script}"}
+    if not keywords_path.exists():
+        return {"available": False,
+                "reason": f"keywords file not found: {keywords_path}"}
+
+    asserts: list[tuple[str, bool, str]] = []
+
+    def call(args: list[str]) -> tuple[int, str, str]:
+        proc = subprocess.run(
+            [sys.executable, str(run_planner_script), *args],
+            capture_output=True, text=True, timeout=10,
+        )
+        return proc.returncode, proc.stdout, proc.stderr
+
+    # 1. archetype -- keyword match (deploy + pipeline -> systems-alchemist)
+    rc, out, err = call(["archetype", "--topic",
+                         "deploy pipeline simplification",
+                         "--keywords", str(keywords_path)])
+    ok_1 = False
+    detail_1 = ""
+    try:
+        data = json.loads(out)
+        ok_1 = (rc == 0
+                and data.get("selected_archetype") == "systems-alchemist"
+                and data.get("fallback_used") is False
+                and "deploy" in data.get("matched_keywords", [])
+                and "pipeline" in data.get("matched_keywords", []))
+        if not ok_1:
+            detail_1 = f"got rc={rc}, archetype={data.get('selected_archetype')!r}, matches={data.get('matched_keywords')}"
+    except (json.JSONDecodeError, AttributeError) as exc:
+        detail_1 = f"non-JSON stdout: {exc} / stderr={err.strip()[:120]}"
+    asserts.append(("archetype keyword match", ok_1, detail_1))
+
+    # 2. archetype -- no match
+    rc, out, _ = call(["archetype", "--topic", "xyzqrt foo bar",
+                       "--keywords", str(keywords_path)])
+    ok_2 = False
+    detail_2 = ""
+    try:
+        data = json.loads(out)
+        ok_2 = (rc == 0
+                and data.get("fallback_used") is True
+                and data.get("selected_archetype") is None
+                and data.get("matched_keywords") == [])
+        if not ok_2:
+            detail_2 = f"got rc={rc}, archetype={data.get('selected_archetype')!r}, fallback={data.get('fallback_used')}"
+    except (json.JSONDecodeError, AttributeError) as exc:
+        detail_2 = f"non-JSON stdout: {exc}"
+    asserts.append(("archetype no match", ok_2, detail_2))
+
+    # 3. archetype -- tie at position 1 -> fallback
+    # Build a temp keywords file with a deliberate tie.
+    tie_kw = tmp_dir / "tie-keywords.txt"
+    tie_kw.write_text(
+        "first-principles-jester: foo\n"
+        "labyrinth-librarian: bar\n"
+        "systems-alchemist: deploy\n"
+        "radagast-brown: forest\n",
+        encoding="utf-8",
+    )
+    rc, out, _ = call(["archetype", "--topic", "forest deploy",
+                       "--keywords", str(tie_kw)])
+    ok_3 = False
+    detail_3 = ""
+    try:
+        data = json.loads(out)
+        ok_3 = (rc == 0
+                and data.get("fallback_used") is True
+                and data.get("selected_archetype") is None)
+        if not ok_3:
+            detail_3 = f"got rc={rc}, archetype={data.get('selected_archetype')!r}"
+    except (json.JSONDecodeError, AttributeError) as exc:
+        detail_3 = f"non-JSON stdout: {exc}"
+    asserts.append(("archetype tie -> fallback", ok_3, detail_3))
+
+    # 4. archetype -- case-insensitive substring
+    rc, out, _ = call(["archetype", "--topic", "DEPLOYS the SYSTEMS",
+                       "--keywords", str(keywords_path)])
+    ok_4 = False
+    detail_4 = ""
+    try:
+        data = json.loads(out)
+        matches = data.get("matched_keywords", [])
+        ok_4 = (rc == 0
+                and "deploy" in matches
+                and "system" in matches)
+        if not ok_4:
+            detail_4 = f"got matches={matches}"
+    except (json.JSONDecodeError, AttributeError) as exc:
+        detail_4 = f"non-JSON stdout: {exc}"
+    asserts.append(("archetype case-insensitive substring", ok_4, detail_4))
+
+    # 5. archetype -- empty topic -> exit 1
+    rc, _, _ = call(["archetype", "--topic", "",
+                     "--keywords", str(keywords_path)])
+    ok_5 = (rc == 1)
+    detail_5 = "" if ok_5 else f"got rc={rc} expected 1"
+    asserts.append(("archetype empty topic -> exit 1", ok_5, detail_5))
+
+    # 6. archetype -- missing keywords file -> exit 2
+    rc, _, _ = call(["archetype", "--topic", "deploy",
+                     "--keywords", str(tmp_dir / "does-not-exist.txt")])
+    ok_6 = (rc == 2)
+    detail_6 = "" if ok_6 else f"got rc={rc} expected 2"
+    asserts.append(("archetype missing keywords -> exit 2", ok_6, detail_6))
+
+    # 7. session -- extract from "Naechste Schritte"
+    sess_a = tmp_dir / "sess-a.md"
+    sess_a.write_text(
+        "# Test Session\n\n"
+        "## Aktueller Stand\n\n- not me\n\n"
+        "## Naechste Schritte\n\n"
+        "1. **Phase 5 starten** in crazy-professor\n"
+        "2. PR reviewen wenn er ankommt\n"
+        "3. Codex hat letzte Session gehangen\n"
+        "4. fourth bullet should not appear\n\n"
+        "## Wichtige Pfade\n\n- ignored\n",
+        encoding="utf-8",
+    )
+    rc, out, _ = call(["session", "--session-path", str(sess_a)])
+    ok_7 = False
+    detail_7 = ""
+    try:
+        data = json.loads(out)
+        cands = data.get("topic_candidates", [])
+        ok_7 = (rc == 0
+                and len(cands) == 3
+                and "Phase 5 starten" in cands[0]["topic"]
+                and cands[0]["rank"] == 1
+                and cands[0]["source"].lower().startswith("naechste")
+                and cands[2]["rank"] == 3)
+        if not ok_7:
+            detail_7 = f"got rc={rc}, candidates={cands}"
+    except (json.JSONDecodeError, AttributeError) as exc:
+        detail_7 = f"non-JSON stdout: {exc}"
+    asserts.append(("session naechste schritte extraction", ok_7, detail_7))
+
+    # 8. session -- multiple paths, dedup
+    sess_b = tmp_dir / "sess-b.md"
+    sess_b.write_text(
+        "## Open Items\n\n"
+        "- duplicate bullet\n"
+        "- new bullet from second file\n"
+        "- another new one\n",
+        encoding="utf-8",
+    )
+    sess_a_overlap = tmp_dir / "sess-a-overlap.md"
+    sess_a_overlap.write_text(
+        "## Naechste Schritte\n\n"
+        "1. duplicate bullet\n"
+        "2. unique-from-a\n",
+        encoding="utf-8",
+    )
+    rc, out, _ = call(["session",
+                       "--session-path", str(sess_a_overlap),
+                       "--session-path", str(sess_b)])
+    ok_8 = False
+    detail_8 = ""
+    try:
+        data = json.loads(out)
+        cands = data.get("topic_candidates", [])
+        topics = [c["topic"] for c in cands]
+        # First path provides "duplicate bullet" + "unique-from-a", second
+        # path adds "new bullet from second file" (we cap at 3, dedup
+        # drops the repeated "duplicate bullet" from the second file).
+        ok_8 = (rc == 0
+                and len(cands) == 3
+                and topics.count("duplicate bullet") == 1
+                and "unique-from-a" in topics
+                and "new bullet from second file" in topics)
+        if not ok_8:
+            detail_8 = f"got rc={rc}, topics={topics}"
+    except (json.JSONDecodeError, AttributeError) as exc:
+        detail_8 = f"non-JSON stdout: {exc}"
+    asserts.append(("session multi-path dedup", ok_8, detail_8))
+
+    passed = sum(1 for _, ok, _ in asserts if ok)
+    total = len(asserts)
+    first_fail = next(((label, detail) for label, ok, detail in asserts if not ok), None)
+    return {
+        "available": True,
+        "passed": passed == total,
+        "passes": passed,
+        "total": total,
+        "asserts": [(label, ok) for label, ok, _ in asserts],
+        "first_fail": first_fail,
+    }
+
+
 def stage_c_live_stub(runs: int) -> int:
     print(
         f"[stage C / live mode] Planned {runs} live skill invocations per "
@@ -388,6 +609,10 @@ def main() -> int:
     p.add_argument("--corpus", type=Path, help="dir of single-mode outputs to lint")
     p.add_argument("--telemetry", type=Path, default=None,
                    help="path to telemetry.py for the smoke test (default: skip)")
+    p.add_argument("--run-planner", type=Path, default=None,
+                   help="path to run_planner.py for the smoke test (default: skip)")
+    p.add_argument("--run-planner-keywords", type=Path, default=None,
+                   help="path to archetype-keywords.txt (required if --run-planner)")
     p.add_argument("--report-out", required=True, type=Path)
     p.add_argument("--picker-runs", type=int, default=50)
     p.add_argument("--strict-voice", action="store_true")
@@ -447,6 +672,18 @@ def main() -> int:
               file=sys.stderr)
         telemetry_results = stage_b_telemetry_smoke(args.telemetry, tmp_dir)
 
+    run_planner_results: dict | None = None
+    if args.run_planner:
+        if not args.run_planner_keywords:
+            print("error: --run-planner-keywords is required when --run-planner is set",
+                  file=sys.stderr)
+            return 2
+        print(f"running run_planner smoke test against {args.run_planner}...",
+              file=sys.stderr)
+        run_planner_results = stage_b_run_planner_smoke(
+            args.run_planner, args.run_planner_keywords, tmp_dir,
+        )
+
     meta = {
         "date": dt.date.today().isoformat(),
         "picker_runs": args.picker_runs,
@@ -454,7 +691,8 @@ def main() -> int:
         "strict_voice": args.strict_voice,
         "skill_version": args.skill_version,
     }
-    report = render_report(picker_results, corpus_results, meta, telemetry_results)
+    report = render_report(picker_results, corpus_results, meta,
+                           telemetry_results, run_planner_results)
     args.report_out.parent.mkdir(parents=True, exist_ok=True)
     args.report_out.write_text(report, encoding="utf-8")
     print(f"report written: {args.report_out}", file=sys.stderr)

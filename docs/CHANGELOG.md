@@ -4,6 +4,25 @@ Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versio
 
 ---
 
+## [v0.10.0] [2026-04-28] Phase 5 — Run Planner + `--dry-run`
+
+**Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil zwei neue user-facing Flags (`--from-session`, `--dry-run`) hinzukommen und der Topic→Archetype-Selector eine neue Run-Mechanik etabliert. Master-Plan-Phase 5 abgeschlossen (4/8 → 5/8 Phasen).
+
+- **5.1 Run Planner** (`scripts/run_planner.py`, ~305 Zeilen, stdlib-only): topic-aware Archetype-Selector + Session-Topic-Suggester als gemeinsame Schicht. Drei Subcommands:
+  - `archetype --topic ... --keywords ...`: Score-Match gegen `resources/archetype-keywords.txt`. Substring-match case-insensitive auf lowercased+punct-stripped Topic. Tie an Position 1 oder Score=0 → `fallback_used: true`, `selected_archetype: null`. Sonst `selection_reason: "keyword_match"` + `matched_keywords` Liste.
+  - `session --session-path <p1> [--session-path <p2> ...]`: parst Markdown-Sections "Naechste Schritte" / "Open Items" (case-tolerant) aus beliebig vielen Files, dedup über alle Pfade, cap auf 3 Topic-Kandidaten. Failure-Modes: keine Pfade → exit 1, alle Pfade unlesbar → exit 3.
+  - `plan --topic ... --keywords ... --session-path ...`: kombiniert beides. Archetype-Fail → exit 2; Session-Fail → `topic_candidates: null` + exit 0.
+  - Stdout-UTF-8-Reconfigure am Anfang von `main()` (Windows cp1252-Workaround für Unicode in session-summary).
+- **5.2 `--dry-run` Flag** (single-run only): Run Planner + Picker laufen, Skill druckt Markdown-Preview-Block (Topic, Archetype mit Selector-Reason und Matched-Keywords, Picker-Output, Field-Notes-Kontext, Variation-Guard-Status), Abort vor Step 3. Komplett side-effect-frei: kein Output-File, kein field-notes-Append, keine Telemetrie. Combination `--chat --dry-run` rejected am Command-Layer.
+- **5.3 `--from-session` Flag**: Skill ruft `run_planner.py session` mit lokalem (`<cwd>/.agent-memory/session-summary.md`) und Desktop-Pfad (`~/Desktop/.agent-memory/session-summary.md`) auf, zeigt User 3 Topic-Kandidaten als nummerierte Liste, fragt "Which? [1/2/3 or own]". User-Wahl wird Topic; bei leerer Antwort Fallback auf Standard-Single-Run-without-topic.
+- **5.4 Resource `archetype-keywords.txt`** (~80 Keywords): one line per archetype, comma-separated keywords. Initial pool gesourced aus den Pflicht-Vokabeln der `prompt-templates/<archetype>.md` Lexicon-Gates plus generische Domain-Wörter (Englisch + Deutsch).
+- **5.5 operating-instructions.md erweitert**: Step 1 bekommt zwei neue Bullets für `--from-session` und `--dry-run`. Step 2 split: Step 2a (Run Planner Archetype-Empfehlung), Step 2b (Picker mit optionalem `--force-archetype`), Step 2c (Variation-Guard, vorher 2b), Step 2d (Dry-Run-Output). Variation-Guard-Konflikt-Resolution dokumentiert: Selector ist Empfehlung, Variation-Guard hartes Constraint, Streak gewinnt.
+- **5.6 Telemetrie-Schema-Erweiterung** (Phase-5-Substrate): zwei neue OPTIONALE Felder `archetype_selector_used` (bool) und `archetype_selector_matched_kw` (list[str]). Phase-4-Vertrag eingehalten (neue Felder müssen optional sein, nie required). Patch-Suggester wird diese Felder lesen sobald genug Daten da sind.
+- **5.7 Eval-Suite-Erweiterung** (`eval_suite.py`): neue Funktion `stage_b_run_planner_smoke()` mit 8 deterministischen Asserts (keyword-match, no-match, tie→fallback, case-insensitive substring, empty topic→exit 1, missing keywords→exit 2, naechste-schritte-extraction, multi-path-dedup). Neue CLI-Args `--run-planner` und `--run-planner-keywords`. Render-Section `## Run Planner smoke (Stage B)` im Baseline-Report. Smoke-getestet: PASS 8/8.
+- **Versions-Bump auf 0.10.0** in 8 Frontmatter-Files (plugin.json, SKILL.md, output-template, chat-output-template, chat-mode-flow.md frontmatter+example+status-line, chat-curator, chat-round-1-wrapper, chat-round-2-wrapper). PROJECT.md "Aktueller Stand" + Roadmap-Checkbox updated. CAPABILITIES.md "Run-Planner" von geplant auf aktiv, plus zwei neue Zeilen für `--from-session` und `--dry-run`. Master-Plan Phase 5 Status ⏳ → ✅ (2026-04-28).
+
+---
+
 ## [v0.9.0] [2026-04-27] Phase 4 — Telemetrie-Layer + Patch-Suggestion-Loop
 
 **Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil der Patch-Suggestion-Loop user-visible ist (alle 10 Runs erscheint ein neuer Vorschlags-File im Lab) und der Telemetrie-Layer eine neue maschinenlesbare Schicht hinzufügt, auf der zukünftige Phasen aufbauen. Master-Plan-Phase 4 abgeschlossen.

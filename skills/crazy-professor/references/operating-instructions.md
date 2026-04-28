@@ -30,12 +30,57 @@ contract (uniform across README.md, commands/crazy.md, and SKILL.md):
   `Chat-mode requires an explicit topic. Run /crazy <topic> --chat or use single-run for ambient topics.`
   Rationale: chat-mode costs ~10 LLM calls and 2-4 min wall-clock and
   must be deliberate. Single-run is the right tool for ambient topics.
+- **Single-run with `--from-session` (since v0.10.0):** instead of
+  parsing a literal topic, call the run-planner session subcommand to
+  read `<cwd>/.agent-memory/session-summary.md` (and the Desktop
+  equivalent as fallback) and extract 3 topic candidates from the
+  "Naechste Schritte" + "Open Items" sections. Show them to the user as
+  a numbered list and ask "Which? [1/2/3 or own]". The user's choice
+  becomes the topic. If `topic_candidates` is empty (no readable file
+  or no matching sections), fall back to the "single-run without topic"
+  rule above.
+- **Single-run with `--dry-run` (since v0.10.0):** the topic is parsed
+  as usual, but Steps 3-7 are NOT executed. Steps 2a + 2b run
+  (run-planner + picker), and the result is printed as a Markdown block
+  on stdout (see Step 2d below). No file is written, no field-notes
+  append, no telemetry append. Aborts before generation. Chat-mode
+  retains its own `--chat --dry-run-round1` flag (different mechanism,
+  unaffected). Combining `--chat --dry-run` is rejected at the command
+  layer (commands/crazy.md).
 
-**Step 2: Pick stochastic elements.**
+**Step 2a: Run Planner -- archetype recommendation (since v0.10.0).**
 
-**Preferred path (since v0.7.0):** call the picker script. It encapsulates
-the mod-4 archetype pick, the word draw, the operator pick, AND the
-variation-guard from Step 2b in one deterministic call:
+Before calling the picker, ask the run-planner which archetype the
+topic-keywords suggest:
+
+```bash
+python <repo-root>/skills/crazy-professor/scripts/run_planner.py archetype \
+  --topic "<the parsed topic>" \
+  --keywords <repo-root>/skills/crazy-professor/resources/archetype-keywords.txt
+```
+
+The script writes one JSON object to stdout. Parse it. Two outcomes:
+
+- `selection_reason == "keyword_match"` AND `fallback_used == false` AND
+  `selected_archetype` non-null: the selector hit. Pass
+  `--force-archetype <selected_archetype>` to picker.py in Step 2b.
+  `matched_keywords` is informational (used by Step 7b telemetry).
+- `fallback_used == true`: no clear winner (zero matches OR tie at
+  position 1). Call picker.py without `--force-archetype` -- the
+  timestamp-mod fallback inside the picker takes over (the v0.9.0
+  behavior).
+
+If run_planner exits non-zero, print
+`[run-planner: skipped -- exit code N]` once on stderr and proceed
+WITHOUT `--force-archetype`. Run-planner is an optional layer; the
+picker is the hard default.
+
+**Step 2b: Pick stochastic elements (picker call).**
+
+Preferred path (since v0.7.0): call the picker script. It encapsulates
+the mod-4 archetype pick (or honors `--force-archetype`), the word
+draw, the operator pick, AND the variation-guard from Step 2c (formerly
+2b) in one deterministic call:
 
 ```bash
 python <repo-root>/skills/crazy-professor/scripts/picker.py \
@@ -43,59 +88,99 @@ python <repo-root>/skills/crazy-professor/scripts/picker.py \
   --words <repo-root>/skills/crazy-professor/resources/provocation-words.txt \
   --retired <repo-root>/skills/crazy-professor/resources/retired-words.txt \
   --init-template <repo-root>/skills/crazy-professor/resources/field-notes-init.md \
-  --mode single
+  --mode single \
+  [--force-archetype <selected_archetype-from-step-2a-if-any>]
 ```
 
 For chat-mode: `--mode chat` returns four picks (one per archetype) in
-a single JSON object.
+a single JSON object. (Chat-mode does NOT use Step 2a's
+archetype-selector since all four archetypes run; the Run Planner is
+single-run only in v0.10.0.)
 
 The script writes one JSON object to stdout containing `archetype`,
 `word`, `operator`, `re_rolled`, `timestamp`, `mode`. Parse it and
-proceed with Step 3. The variation-guard from Step 2b is already
-applied inside the script — skip Step 2b in this path.
+proceed with Step 3. The variation-guard from Step 2c is already
+applied inside the script.
+
+**Variation-guard vs. selector conflict:** if Step 2a recommended an
+archetype that is in a 3-in-a-row streak in the last 10 field-notes
+rows, the picker will override the recommendation
+(`re_rolled: archetype` or `forced-archetype+archetype`). The
+variation-guard always wins. The selector is a recommendation, the
+guard is a hard constraint. This is the documented behavior.
 
 **Fallback path (if Python is unavailable):**
 
-- Archetype: take current UTC timestamp minute mod 4 (0=jester, 1=librarian,
-  2=alchemist, 3=radagast-brown). This is deterministic-within-minute,
-  random-across-minutes. All four archetypes active since 2026-04-23
-  (Radagast activation passed, see
-  `<repo-root>/skills/crazy-professor/references/radagast-activation.md`).
+- Archetype: take current UTC timestamp minute mod 4 (0=jester,
+  1=librarian, 2=alchemist, 3=radagast-brown). Skip Step 2a entirely in
+  this path. All four archetypes active since 2026-04-23.
 - Provocation word: pick one random line from
   `<repo-root>/skills/crazy-professor/resources/provocation-words.txt`.
-  Filter out any word that also appears in
-  `<repo-root>/skills/crazy-professor/resources/retired-words.txt`.
-  The pool contains both single words and 2-3-token phrases (e.g.
-  `paradox tax`, `false-bottom`) — both formats are valid.
-- PO-operator: take timestamp second mod 3 (0=reversal, 1=exaggeration,
-  2=escape).
-- Then apply Step 2b manually.
+  Filter out words that appear in `retired-words.txt`.
+- PO-operator: take timestamp second mod 3 (0=reversal,
+  1=exaggeration, 2=escape).
+- Then apply Step 2c manually.
 
-**Step 2b: Variation guard (field-notes.md as forced input).**
+**Step 2c: Variation guard (field-notes.md as forced input).**
 
-Before accepting the Step 2 picks, read the last 10 rows of the "Log"
+Before accepting the Step 2b picks, read the last 10 rows of the "Log"
 table in `.agent-memory/lab/crazy-professor/field-notes.md` (fewer if
 the log is shorter). Apply these two rules in order:
 
 - Archetype guard: if the same archetype appears in the last 3
-  consecutive rows AND the Step 2 pick would make it a 4th, discard the
-  pick and choose one of the other three archetypes (respecting the
-  Radagast latency — if radagast-brown is still gated, choose from the
-  remaining two). Tie-break: whichever of the candidates appeared least
-  recently in the log, then alphabetical.
-- Word guard: if the Step 2 word appears anywhere in the last 10 rows,
-  draw another word from `provocation-words.txt` (still filtering against
-  `retired-words.txt`). Repeat until a word is found that is not in the
-  last 10 rows. If the pool is exhausted (every remaining word is in the
-  window), accept the least-recently-used word.
+  consecutive rows AND the Step 2b pick would make it a 4th, discard
+  the pick and choose one of the other three archetypes (respecting
+  the Radagast latency -- if radagast-brown is still gated, choose
+  from the remaining two). Tie-break: whichever of the candidates
+  appeared least recently in the log, then alphabetical.
+- Word guard: if the Step 2b word appears anywhere in the last 10
+  rows, draw another word from `provocation-words.txt` (still
+  filtering against `retired-words.txt`). Repeat until a word is found
+  that is not in the last 10 rows. If the pool is exhausted (every
+  remaining word is in the window), accept the least-recently-used
+  word.
 
 Record the guard outcome for Step 7: one of `no`, `archetype`, `word`,
-or `both`. This value goes into the `re-rolled` column in
-field-notes.md.
+`both`, `forced-archetype`, or `forced-archetype+<other>`. This value
+goes into the `re-rolled` column in field-notes.md.
 
-Rationale: field-notes.md is otherwise write-only. Reading it before the
-picker turns the log into backpressure that prevents archetype/word
-clustering across sessions. Not total prohibition — just anti-streak.
+Rationale: field-notes.md is otherwise write-only. Reading it before
+the picker turns the log into backpressure that prevents
+archetype/word clustering across sessions. Not total prohibition --
+just anti-streak.
+
+**Step 2d: Dry-run output (when `--dry-run` is set, since v0.10.0).**
+
+If the user invoked `/crazy <topic> --dry-run`, do NOT proceed to
+Step 3. Instead, print the following Markdown block on stdout and stop:
+
+```
+### Crazy Professor -- Dry Run
+
+Topic: "<the parsed topic>"
+
+Run Planner:
+  Archetype: <selected_archetype or "(fallback)">
+    Selector reason: <"keyword_match" or "fallback (no match)" or "fallback (tie)">
+    Matched keywords: [<keywords> or "(none)"]
+
+Picker:
+  Word: <picked word>
+  Operator: <picked operator>
+  Re-rolled: <re_rolled value>
+  Timestamp: <picker timestamp>
+
+Field-notes context:
+  Rows read: <field_notes_rows_read>
+  Last 10 archetypes: [<archetype list, oldest first>]
+
+Variation Guard: <"streak detected -> override" or "no streak">
+
+ABORT before generation. No file written, no telemetry, no field-notes.
+```
+
+This block is the ONLY output for a dry-run invocation. Do not run
+Steps 3-7.
 
 **Step 3: Load the archetype's prompt template.** Read the matching
 `<repo-root>/skills/crazy-professor/prompt-templates/*.md` file. Its
@@ -205,6 +290,20 @@ Default path: `~/Desktop/.agent-memory/lab/crazy-professor/telemetry.jsonl`
 Telemetry is the substrate for Museum-Clause / Variation-Guard /
 Repetition-Watch evaluation. Skip silently if Python is unavailable;
 the field-notes row from Step 7 remains the authoritative log.
+
+**New optional fields since v0.10.0** (Phase-5 substrate):
+
+- `archetype_selector_used` (bool): true if Step 2a's run-planner
+  selector recommended an archetype (`selection_reason ==
+  "keyword_match"`). False if `fallback_used == true` or run-planner
+  was skipped. Optional: omit if main-model has no signal.
+- `archetype_selector_matched_kw` (list[str]): the `matched_keywords`
+  array from run-planner output. Empty list when fallback was used or
+  when the field above is false. Optional.
+
+Both fields break no existing readers (Phase-4 contract: new fields
+must be optional, never required). The patch-suggester will read these
+fields once enough data accumulates.
 
 **Step 7c: Optional patch-suggestion-loop (since v0.9.0).** If the
 single-mode run count is a non-zero multiple of 10 (count rows in
