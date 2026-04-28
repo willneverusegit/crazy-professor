@@ -305,6 +305,22 @@ Both fields break no existing readers (Phase-4 contract: new fields
 must be optional, never required). The patch-suggester will read these
 fields once enough data accumulates.
 
+**New optional fields since v0.11.0** (Phase-6 substrate):
+
+- `compact_mode` (bool): true if `--chat --compact` was active for this
+  run. Single-run is always false (the flag is rejected at the command
+  layer). Optional: omit for legacy single-runs.
+- `low_substance_hits` (int): number of R2 items flagged by
+  `lint_cross_pollination.py` when `--strict-cross-pollination` ran. 0
+  if the flag was absent. Optional.
+- `wishful_thinking_active` (bool): true if any picked operator in this
+  run was `wishful-thinking`. In single-run: trivial string compare on
+  `operator`. In chat-run: true if ≥1 of the 4 picks was `wishful-thinking`.
+  Optional.
+
+All three fields keep the Phase-4 contract: new fields must be optional,
+never required. Readers ignore unknown fields.
+
 **Step 7c: Optional patch-suggestion-loop (since v0.9.0).** If the
 single-mode run count is a non-zero multiple of 10 (count rows in
 field-notes.md Log table where `archetype != all-4 (chat-mode)`), call:
@@ -367,6 +383,41 @@ receives:
 provocations, set `round2_status: degraded` in the frontmatter and
 skip round-2 outputs entirely — round 3 receives only round-1 data.
 This is NOT an abort; the chat-run continues to round 3.
+
+**Step C4b: Cross-Pollination Substanz-Check (when `--strict-cross-pollination` is set, since v0.11.0).**
+
+If `--strict-cross-pollination` was passed in the invocation, run the
+cross-pollination linter on the Round 2 output:
+
+```bash
+python <repo-root>/skills/crazy-professor/scripts/lint_cross_pollination.py \
+  --r1-input <tmp-r1.json> \
+  --r2-input <tmp-r2.json> \
+  [--min-overlap 1] \
+  [--stop-words <repo-root>/skills/crazy-professor/resources/stop-words.txt]
+```
+
+Skill writes the in-memory R1 + R2 sections to two temporary JSON files
+in the form documented in the linter's docstring. The linter checks each
+R2 item for: (1) `counter:`/`extend:` marker presence, (2) ref idx in
+1..5 + ref archetype is in R1, (3) at least `min-overlap` non-stopword
+tokens shared between R2 item text and the referenced R1 item text.
+
+Linter writes JSON to stdout: `{low_substance_hits, findings, stats}`.
+Exit code is always 0 (warn-only).
+
+For each finding, the skill locates the original R2 item line and
+appends `[low-substance: <reason>]` at the end of the line. The
+findings count goes into telemetry field `low_substance_hits` in
+Step C7b.
+
+Without `--strict-cross-pollination`, this step is skipped entirely.
+Round 3 still runs as normal — the linter does NOT filter or remove
+items, it only annotates.
+
+If R2 was set to `degraded` in Step C4 (≥2 archetypes < 2 items), this
+step is also skipped (no R2 items to lint). Telemetry
+`low_substance_hits: 0`, `round2_status: skipped`.
 
 **Step C5: Round 3 — Codex distillation.** Invoke `codex:codex-rescue`
 subagent (run_in_background=false) with the prompt from

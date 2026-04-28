@@ -66,8 +66,13 @@ User Prompt / "crazy professor" / /crazy <topic>
 
 ### Resources
 - **Datei(en):** `skills/crazy-professor/resources/`
-- **Aufgabe:** Statische Daten: `provocation-words.txt` (Pool), `retired-words.txt` (Schwarze Liste), `po-operators.md`, `output-template.md`, `chat-output-template.md`.
+- **Aufgabe:** Statische Daten: `provocation-words.txt` (Pool), `retired-words.txt` (Schwarze Liste), `po-operators.md` (4 Operatoren seit v0.11.0), `output-template.md`, `chat-output-template.md` (mit Compact-Mode-Body-Beispiel seit v0.11.0), `archetype-keywords.txt`, `field-notes-init.md`, `field-notes-schema.md`, `stop-words.txt` (seit v0.11.0, fuer Cross-Pollination-Linter Token-Overlap-Filter).
 - **Abhaengigkeiten:** —
+
+### Linter-Skripte (4 seit v0.11.0)
+- **Datei(en):** `skills/crazy-professor/scripts/lint_voice.py`, `lint_word_pool.py`, `lint_cross_pollination.py` (4. Linter, Phase 6), und der Validator `validate_output.py`.
+- **Aufgabe:** Pre-Write-Quality-Gates. `lint_voice` prueft Lexicon-Gate pro Archetype. `lint_word_pool` prueft Wort-Pool-Integritaet. `lint_cross_pollination` prueft R2-Items in Chat-Mode-Output auf Marker-Existenz, Ref-Aufloesung und Token-Overlap mit Ref (warn-only, exit 0 immer). Aktiviert nur via `--strict-cross-pollination`. `validate_output` prueft Format-Drift und seit v0.11.0 die Compact-Mode-Reihenfolge.
+- **Abhaengigkeiten:** Stdlib-only. `lint_cross_pollination` liest `resources/stop-words.txt`.
 
 ### Codex-Subagent (extern)
 - **Datei(en):** Plugin `codex` mit `codex:codex-rescue` Skill

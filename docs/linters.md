@@ -1,6 +1,6 @@
 # Linters
 
-The crazy-professor plugin ships three linters and one evaluation suite,
+The crazy-professor plugin ships four linters and one evaluation suite,
 all stdlib-only Python. They run at three different cadences depending
 on what they protect.
 
@@ -10,8 +10,31 @@ on what they protect.
 |---|---|---|---|
 | `lint_word_pool.py` | per commit (or manual) | yes | Pool integrity: duplicates, case, multi-word format, whitespace, retired/active overlap. |
 | `lint_voice.py` | per skill run (Step 5b) | warns by default, errors on cross-archetype tokens | Per-archetype lexicon. Catches voice drift before write. |
-| `validate_output.py` | per skill run (Step 6) | yes | Format drift: frontmatter, divergence banner, exact 10-provocation count, line shape, sectioning. |
-| `eval_suite.py` | on demand (or scheduled) | no -- writes a report | Stage B static + corpus baseline. Stage C live invocation hook (currently a stub). |
+| `lint_cross_pollination.py` | per chat-run (Step C4b, only when `--strict-cross-pollination` is set) | no -- warn-only (exit 0 always) | Cross-pollination substance: marker existence, ref resolution (archetype + idx in 1..5), token overlap with referenced R1 item. Findings appear as `[low-substance: <reason>]` markers in R2 lines. |
+| `validate_output.py` | per skill run (Step 6) | yes | Format drift: frontmatter, divergence banner, exact 10-provocation count, line shape, sectioning. Since v0.11.0 also branches on `compact: true` to validate the audit-trail body order. |
+| `eval_suite.py` | on demand (or scheduled) | no -- writes a report | Stage B static + corpus baseline. Stage C/D/E smoke tests for compact-mode, cross-pollination linter, wishful-thinking picker (since v0.11.0). |
+
+## Cross-pollination linter (since v0.11.0)
+
+The cross-pollination substance linter is the 4th member of the linter
+trio (now quartet), activated only when `--strict-cross-pollination` is
+passed to a chat-mode invocation. It enforces three deterministic checks
+per Round 2 item:
+
+1. **Marker existence**: `counter: <ref>` or `extend: <ref>` must be present.
+2. **Ref resolution**: `<ref>` must point to an existing R1 item
+   (archetype + idx in 1..5).
+3. **Token overlap**: at least `--min-overlap` (default 1) non-stopword
+   tokens (>=3 chars) must be shared between the R2 item text and the
+   referenced R1 item text. Stop-words from `resources/stop-words.txt`.
+
+Findings are warn-only — the linter never filters or removes R2 items.
+Output is JSON on stdout. Exit code is always 0. The skill ingests the
+JSON, locates each flagged R2 line, and appends
+`[low-substance: <reason>]` at the end. The total finding count is
+recorded in telemetry as `low_substance_hits`.
+
+See operating-instructions Step C4b for invocation details.
 
 ## Word-pool linter
 

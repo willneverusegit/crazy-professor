@@ -4,6 +4,22 @@ Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versio
 
 ---
 
+## [v0.11.0] [2026-04-28] Phase 6 — Cross-Pollination + Kompakt-Modus
+
+**Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil zwei neue user-facing Flags (`--chat --compact`, `--strict-cross-pollination`) und ein 4. PO-Operator (`wishful-thinking`) als kontrolliertes Feldtest-Set aktiviert werden. Master-Plan-Phase 6 abgeschlossen (5/8 → 6/8 Phasen).
+
+- **6.1 `--chat --compact`-Flag**: reordert Chat-Output. Round 3 (Final 20) + Top-3 + Next-Experiment + Self-Flag erscheinen primär; Round 1 + Round 2 in einem `<details>`-Audit-Trail-Block am Ende. Frontmatter bekommt neues optionales Feld `compact: true`. Validator branched auf das Feld und prüft die geforderte Reihenfolge. `--compact` ohne `--chat` wird am Command-Layer mit Fehlermeldung `--compact requires --chat. Single-run output is already flat.` abgelehnt.
+- **6.2 `--strict-cross-pollination`-Flag**: deterministische Substanz-Heuristik via neuem 4. Linter `lint_cross_pollination.py` (~330 LOC, stdlib-only). Drei Checks pro R2-Item: (1) Marker-Existenz `counter:`/`extend:`, (2) Ref-Auflösung archetype + idx in 1..5, (3) Token-Overlap mit Ref >= `--min-overlap` (default 1) nach Stop-Word-Filter. Findings erscheinen als `[low-substance: <reason>]`-Marker direkt in den R2-Zeilen. Exit-Code immer 0 (warn-only — keine Items werden gefiltert). Operating-Instructions Step C4b dokumentiert.
+- **6.3 4. PO-Operator `wishful-thinking` aktiviert**: `picker.py` bekommt `--wishful-share <float>` Default `0.25`. Operator-Liste wird dynamisch 4-elementig mit Gewichten `[1, 1, 1, share*3]`. Bei `share=0.0` Regression auf v0.10.0-3-Operator-Verhalten, bei `share=0.333` exakt 25%/25%/25%/25%, bei `share=1.0` ~50% wishful (Gewichte `[1,1,1,3]`). `random.choices` mit Mikrosekunden-Seed für Determinismus. `po-operators.md` enthält volle Wishful-Thinking-Section mit Definition, Scaffold und Distinction-from-Reversal-and-Escape.
+- **3 neue optionale Telemetrie-Felder** (Phase-4-Vertrag eingehalten): `compact_mode` (bool), `low_substance_hits` (int), `wishful_thinking_active` (bool). Backward-compatible — alte Reader ignorieren unbekannte Felder.
+- **Neue Resource** `skills/crazy-professor/resources/stop-words.txt` (~130 Zeilen, EN+DE-Mix + Archetype-/Operator-Labels).
+- **Eval-Suite erweitert** um drei neue Smoke-Test-Stages: Stage C (Compact-Mode, 5 Asserts), Stage D (Cross-Pollination Linter, 8 Asserts), Stage E (Wishful-Thinking Picker, 6 Asserts). Plus Operator-Coverage-Aggregate in Stage A. Total +19 Asserts. Stage A `run_picker_once` akzeptiert jetzt `wishful-thinking` als gültigen Operator.
+- **Eval-Baseline 2026-04-28** (Phase 6) vollständig PASS: Stage A 200/200 (alle 4 Operatoren in Distribution sichtbar), Stage B Telemetry+Run-Planner PASS, Stage C 5/5, Stage D 8/8, Stage E 6/6.
+- **Inline-Plan-Korrekturen während Execution**: (a) `picker.py --help`-Text korrigiert (`share=1.0` ist NICHT 25/25/25/25, sondern wishful ~50%; korrekt: `share=0.333` ist gleichverteilt). (b) Stage E share=1.0-Assert-Schranken angepasst auf reale Verteilung statt 30-70-Annahme.
+- **Workflow-Pattern**: brainstorming → spec → plan → executing-plans (inline) — zweite vollständige Anwendung nach Phase 5, weiter bewährt.
+
+---
+
 ## [v0.10.0] [2026-04-28] Phase 5 — Run Planner + `--dry-run`
 
 **Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil zwei neue user-facing Flags (`--from-session`, `--dry-run`) hinzukommen und der Topic→Archetype-Selector eine neue Run-Mechanik etabliert. Master-Plan-Phase 5 abgeschlossen (4/8 → 5/8 Phasen).

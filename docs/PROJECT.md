@@ -14,7 +14,7 @@ Divergence-Generator als Claude-Code-Plugin: vier Archetypen produzieren strange
 
 ## Aktueller Stand
 
-v0.10.0 released 2026-04-28. Single-Run und Chat-Mode aktiv. Master-Plan-Phasen 1-5 abgeschlossen: 1 (Vertragsbereinigung), 2 (Picker-Skript + field-notes-Schema + Output-Validator), 3 (Linter-Trio + Eval-Suite), 4 (Telemetrie + Patch-Suggestion-Loop), 5 (Run-Planner: topic-aware Archetype-Selector + `--from-session` + `--dry-run`). Vollständige stdlib-only Python-Toolchain in `scripts/`: picker, validate_output, lint_voice, lint_word_pool, eval_suite, telemetry, patch_suggester, run_planner. Run Planner schichtet sich vor den Picker: Selector schlaegt aus Topic-Keywords einen Archetype vor, Picker setzt ihn via `--force-archetype`, Variation-Guard gewinnt aber bei Streaks. `--from-session` zieht Topic-Kandidaten aus session-summary.md (lokal + Desktop). `--dry-run` zeigt Picker-Output ohne Generation, side-effect-frei. Phase 6 (Cross-Pollination + Compact) steht an. Versions-Policy in `docs/VERSIONING.md`.
+v0.11.0 released 2026-04-28. Single-Run und Chat-Mode aktiv. Master-Plan-Phasen 1-6 abgeschlossen: 1 (Vertragsbereinigung), 2 (Picker-Skript + field-notes-Schema + Output-Validator), 3 (Linter-Trio + Eval-Suite), 4 (Telemetrie + Patch-Suggestion-Loop), 5 (Run-Planner: topic-aware Archetype-Selector + `--from-session` + `--dry-run`), 6 (Cross-Pollination Substanz-Check + Compact-Mode + 4. PO-Operator). Vollständige stdlib-only Python-Toolchain in `scripts/`: picker, validate_output, lint_voice, lint_word_pool, lint_cross_pollination, eval_suite, telemetry, patch_suggester, run_planner. Phase 6 hat drei optionale Chat-Mode-Erweiterungen aktiviert: `--chat --compact` reordert Output (R3 + Top-3 + Next-Experiment primaer, R1+R2 in `<details>`-Audit-Trail), `--strict-cross-pollination` läuft den 4. Linter `lint_cross_pollination.py` (deterministische Marker+Ref+Token-Overlap-Heuristik, warn-only), und `wishful-thinking` ist aktiver 4. PO-Operator mit `--wishful-share` Default 0.25 (relative Gewichte). Drei neue optionale Telemetrie-Felder. Phase 7 (GUI/Playground, optional) steht an. Versions-Policy in `docs/VERSIONING.md`.
 
 ## Kernfaehigkeiten
 
@@ -33,7 +33,7 @@ Kurzfassung:
 - [x] Phase 3: Linter-Trio (Word-Pool + Pflicht/Verbots-Vokabular pro Archetype) + Eval-Suite (✅ v0.8.0)
 - [x] Phase 4: Telemetrie + Patch-Suggestion-Loop alle 10 Runs (✅ v0.9.0)
 - [x] Phase 5: Run-Planner (Archetype-Selector + `--from-session` + `--dry-run`) (✅ v0.10.0)
-- [ ] Phase 6: `--chat --compact`, `--strict-cross-pollination`, 4. PO-Operator (`wishful thinking`)
+- [x] Phase 6: `--chat --compact`, `--strict-cross-pollination`, 4. PO-Operator (`wishful thinking`) (✅ v0.11.0)
 - [ ] Phase 7 (optional): Single-File-HTML-Playground
 - [ ] Phase 8 (optional, RISIKO): Telegram-Bridge
 
