@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import random
 import re
 import shutil
 import sys
@@ -39,7 +40,9 @@ ARCHETYPES = (
     "systems-alchemist",
     "radagast-brown",
 )
-OPERATORS = ("reversal", "exaggeration", "escape")
+BASE_OPERATORS = ("reversal", "exaggeration", "escape")
+WISHFUL_OPERATOR = "wishful-thinking"
+OPERATORS = BASE_OPERATORS  # kept for backward-compat -- variation_guard etc. read this name
 LOG_TABLE_HEADER_RE = re.compile(r"^\|\s*#\s*\|\s*Timestamp", re.IGNORECASE)
 LOG_TABLE_ROW_RE = re.compile(r"^\|\s*\d+\s*\|")
 
@@ -92,11 +95,34 @@ def normalize_archetype(raw: str) -> str:
     return raw
 
 
-def picker_seed(ts: dt.datetime, offset_seconds: int = 0) -> tuple[str, str, str]:
+def pick_operator_with_share(seed_ts: dt.datetime, wishful_share: float) -> str:
+    """Pick a PO operator using random.choices with relative weights.
+
+    wishful_share semantics:
+      - 0.0 (or below): only the 3 base operators (reversal/exaggeration/escape).
+      - >0.0: 4 operators with weights [1, 1, 1, share*3].
+        At share=0.333 each operator is ~25%. At share=1.0 each is exactly 25%.
+        At share=0.25 (default since v0.11.0) wishful is ~14%, others ~28.6%.
+
+    Determinism: random.choices is seeded with the timestamp microseconds
+    so the same timestamp produces the same operator pick (matches the
+    rest of the picker's mod-based determinism).
+    """
+    if wishful_share <= 0.0:
+        idx = seed_ts.second % 3
+        return BASE_OPERATORS[idx]
+    rng = random.Random(seed_ts.microsecond + seed_ts.second * 1000)
+    operators = list(BASE_OPERATORS) + [WISHFUL_OPERATOR]
+    weights = [1.0, 1.0, 1.0, wishful_share * 3.0]
+    return rng.choices(operators, weights=weights, k=1)[0]
+
+
+def picker_seed(ts: dt.datetime, offset_seconds: int = 0,
+                wishful_share: float = 0.0) -> tuple[str, str, str]:
     """Deterministic mod-based picker for archetype/operator and a word index seed."""
     seed_ts = ts + dt.timedelta(seconds=offset_seconds)
     archetype = ARCHETYPES[seed_ts.minute % 4]
-    operator = OPERATORS[seed_ts.second % 3]
+    operator = pick_operator_with_share(seed_ts, wishful_share)
     return archetype, operator, seed_ts.isoformat().replace("+00:00", "Z")
 
 
@@ -140,7 +166,7 @@ def pick_word(available_words: list[str], seed_ts: dt.datetime, offset: int = 0)
 
 
 def pick_single(args, words: list[str], rows: list[dict], ts: dt.datetime) -> dict:
-    archetype, operator, ts_iso = picker_seed(ts)
+    archetype, operator, ts_iso = picker_seed(ts, wishful_share=args.wishful_share)
     if args.force_archetype:
         archetype = args.force_archetype
     word = pick_word(words, ts)
@@ -158,14 +184,16 @@ def pick_single(args, words: list[str], rows: list[dict], ts: dt.datetime) -> di
     }
 
 
-def pick_chat(words: list[str], rows: list[dict], ts: dt.datetime) -> dict:
+def pick_chat(words: list[str], rows: list[dict], ts: dt.datetime,
+              wishful_share: float = 0.0) -> dict:
     """Four picks, one per archetype. Word-guard runs across the chat-run."""
     chat_rolled = []
     chat_words: set[str] = set()
     picks = []
     for i, archetype in enumerate(ARCHETYPES):
         offset = i  # one second per archetype to vary operator pick
-        _, operator, _ = picker_seed(ts, offset_seconds=offset)
+        _, operator, _ = picker_seed(ts, offset_seconds=offset,
+                                     wishful_share=wishful_share)
         word = pick_word(words, ts, offset=i * 7)  # spread word picks
         intra_chat = "no"
         if word in chat_words:
@@ -213,7 +241,15 @@ def main() -> int:
     p.add_argument("--init-template", type=Path, help="copy this file to --field-notes if missing")
     p.add_argument("--force-archetype", choices=ARCHETYPES, help="bypass mod-4 picker")
     p.add_argument("--force-timestamp", help="ISO-8601 UTC override (testing)")
+    p.add_argument("--wishful-share", type=float, default=0.25,
+                   help="relative weight for wishful-thinking operator. "
+                        "0.0 = disabled (3-operator legacy), 1.0 = equal 25%% each "
+                        "(default 0.25 = ~14%% wishful, ~28.6%% each base operator)")
     args = p.parse_args()
+    if args.wishful_share < 0.0 or args.wishful_share > 1.0:
+        print(f"error: --wishful-share must be in [0.0, 1.0] (got {args.wishful_share})",
+              file=sys.stderr)
+        return 1
 
     # Initialization
     if not args.field_notes.exists():
@@ -245,7 +281,7 @@ def main() -> int:
     if args.mode == "single":
         result = pick_single(args, words, rows, ts)
     else:
-        result = pick_chat(words, rows, ts)
+        result = pick_chat(words, rows, ts, wishful_share=args.wishful_share)
 
     json.dump(result, sys.stdout, ensure_ascii=False)
     sys.stdout.write("\n")
