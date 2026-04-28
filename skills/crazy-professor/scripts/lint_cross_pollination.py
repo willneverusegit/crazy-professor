@@ -77,6 +77,28 @@ MARKER_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Default stop-words live next to the script; user can override with --stop-words.
+DEFAULT_STOP_WORDS_PATH = (Path(__file__).resolve().parent.parent
+                           / "resources" / "stop-words.txt")
+TOKEN_RE = re.compile(r"[a-z0-9\-]+")
+
+
+def load_stop_words(path: Path | None) -> set[str]:
+    target = path if path else DEFAULT_STOP_WORDS_PATH
+    if not target.exists():
+        return set()
+    words = set()
+    for line in target.read_text(encoding="utf-8").splitlines():
+        s = line.strip().lower()
+        if s and not s.startswith("#"):
+            words.add(s)
+    return words
+
+
+def tokenize(text: str, stop_words: set[str]) -> set[str]:
+    tokens = TOKEN_RE.findall(text.lower())
+    return {t for t in tokens if len(t) >= 3 and t not in stop_words}
+
 
 def normalize_archetype(name: str) -> str | None:
     """Return canonical short label or None if not a known archetype."""
@@ -157,6 +179,29 @@ def parse_r2_md(text: str) -> dict[str, list[dict]]:
     return sections
 
 
+def check_token_overlap(item: dict, r1: dict, stop_words: set[str],
+                        min_overlap: int) -> tuple[str, str] | None:
+    """Check 3: Token-Overlap. Returns (severity, reason) or None.
+    Assumes Checks 1 + 2 already passed. Compares R2 item text and the
+    referenced R1 item text for non-stopword token overlap.
+    """
+    arch = item["ref_archetype"]
+    idx = item["ref_idx"]
+    archetype_section = r1.get(arch, {})
+    if isinstance(archetype_section, dict):
+        ref_text = archetype_section.get(idx) or archetype_section.get(str(idx)) or ""
+    elif isinstance(archetype_section, list):
+        ref_text = archetype_section[idx - 1] if 1 <= idx <= len(archetype_section) else ""
+    else:
+        ref_text = ""
+    item_tokens = tokenize(item.get("text", ""), stop_words)
+    ref_tokens = tokenize(ref_text, stop_words)
+    overlap = item_tokens & ref_tokens
+    if len(overlap) < min_overlap:
+        return ("warn", f"token overlap with ref < {min_overlap}")
+    return None
+
+
 def check_ref_resolution(item: dict, r1: dict) -> tuple[str, str] | None:
     """Check 2: Ref-Resolution. Returns (severity, reason) or None.
     Assumes Check 1 already passed (marker is set). Verifies the marker's
@@ -216,6 +261,8 @@ def main() -> int:
         r1 = parse_r1_md(args.r1_md.read_text(encoding="utf-8"))
         r2 = parse_r2_md(args.r2_md.read_text(encoding="utf-8"))
 
+    stop_words = load_stop_words(args.stop_words)
+
     findings: list[dict] = []
     items_total = 0
     for archetype, items in r2.items():
@@ -244,7 +291,18 @@ def main() -> int:
                     "reason": reason,
                 })
                 continue
-            # Check 3 (Token-Overlap) is added in Task 7. For now, marker + ref-resolution.
+
+            check = check_token_overlap(item, r1, stop_words, args.min_overlap)
+            if check:
+                severity, reason = check
+                findings.append({
+                    "archetype": archetype,
+                    "idx": item.get("idx"),
+                    "ref": item.get("ref"),
+                    "severity": severity,
+                    "reason": reason,
+                })
+                continue
 
     by_severity: dict[str, int] = {}
     for f in findings:
