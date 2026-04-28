@@ -169,10 +169,27 @@ def pick_single(args, words: list[str], rows: list[dict], ts: dt.datetime) -> di
     archetype, operator, ts_iso = picker_seed(ts, wishful_share=args.wishful_share)
     if args.force_archetype:
         archetype = args.force_archetype
+    if args.force_operator:
+        operator = args.force_operator
     word = pick_word(words, ts)
+    if args.force_word:
+        if args.force_word in words:
+            word = args.force_word
+        else:
+            print(f"warning: --force-word {args.force_word!r} not in active pool "
+                  f"(retired or unknown), falling back to random pick",
+                  file=sys.stderr)
     archetype, word, re_rolled = variation_guard(archetype, word, rows, words, ts)
+    forced_markers = []
     if args.force_archetype:
-        re_rolled = "forced-archetype" if re_rolled == "no" else f"forced-archetype+{re_rolled}"
+        forced_markers.append("forced-archetype")
+    if args.force_word:
+        forced_markers.append("forced-word")
+    if args.force_operator:
+        forced_markers.append("forced-operator")
+    if forced_markers:
+        prefix = "+".join(forced_markers)
+        re_rolled = prefix if re_rolled == "no" else f"{prefix}+{re_rolled}"
     return {
         "timestamp": ts_iso,
         "mode": "single",
@@ -240,6 +257,10 @@ def main() -> int:
     p.add_argument("--mode", choices=("single", "chat"), default="single")
     p.add_argument("--init-template", type=Path, help="copy this file to --field-notes if missing")
     p.add_argument("--force-archetype", choices=ARCHETYPES, help="bypass mod-4 picker")
+    p.add_argument("--force-word", help="bypass word random pick (variation-guard still applies)")
+    p.add_argument("--force-operator",
+                   choices=("reversal", "exaggeration", "escape", "wishful-thinking"),
+                   help="bypass operator random pick (variation-guard still applies)")
     p.add_argument("--force-timestamp", help="ISO-8601 UTC override (testing)")
     p.add_argument("--wishful-share", type=float, default=0.25,
                    help="relative weight for wishful-thinking operator (weights = "
