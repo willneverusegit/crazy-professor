@@ -286,12 +286,17 @@ def render_wishful_section(stage: dict) -> list[str]:
     return _render_stage_section("Wishful-thinking picker smoke (Stage E)", stage)
 
 
+def render_playground_section(stage: dict) -> list[str]:
+    return _render_stage_section("Playground build smoke (Stage F)", stage)
+
+
 def render_report(picker_results: dict, corpus_results: dict | None,
                   meta: dict, telemetry_results: dict | None = None,
                   run_planner_results: dict | None = None,
                   compact_results: dict | None = None,
                   cp_results: dict | None = None,
-                  wishful_results: dict | None = None) -> str:
+                  wishful_results: dict | None = None,
+                  playground_results: dict | None = None) -> str:
     lines: list[str] = []
     lines.append(f"# Eval Baseline {meta['date']}")
     lines.append("")
@@ -345,6 +350,8 @@ def render_report(picker_results: dict, corpus_results: dict | None,
             lines.extend(render_cross_pollination_section(cp_results))
         if wishful_results is not None:
             lines.extend(render_wishful_section(wishful_results))
+        if playground_results is not None:
+            lines.extend(render_playground_section(playground_results))
         return "\n".join(lines) + "\n"
 
     lines.append("")
@@ -393,6 +400,8 @@ def render_report(picker_results: dict, corpus_results: dict | None,
         lines.extend(render_cross_pollination_section(cp_results))
     if wishful_results is not None:
         lines.extend(render_wishful_section(wishful_results))
+    if playground_results is not None:
+        lines.extend(render_playground_section(playground_results))
 
     return "\n".join(lines) + "\n"
 
@@ -1112,6 +1121,150 @@ Run a smoke.
     }
 
 
+def stage_f_playground_build_smoke(build_script: Path, words: Path,
+                                   retired: Path, po_operators: Path,
+                                   tmp_dir: Path) -> dict:
+    """8-assert smoke test for build_playground.py."""
+    if not build_script.exists():
+        return {"available": False,
+                "reason": f"build script not found: {build_script}"}
+    if not po_operators.exists():
+        return {"available": False,
+                "reason": f"po-operators file not found: {po_operators}"}
+
+    asserts: list[tuple[str, bool, str]] = []
+
+    out_html = tmp_dir / "playground-stagef.html"
+    proc = subprocess.run(
+        [sys.executable, str(build_script),
+         "--output", str(out_html),
+         "--words", str(words),
+         "--retired", str(retired),
+         "--po-operators", str(po_operators),
+         "--version", "0.12.0-test"],
+        capture_output=True, text=True, timeout=10,
+    )
+    ok_1 = (proc.returncode == 0 and out_html.exists())
+    asserts.append(("build runs clean with required args",
+                    ok_1, "" if ok_1 else f"rc={proc.returncode}, err={proc.stderr.strip()[:120]}"))
+
+    if not out_html.exists():
+        for label in ("HTML well-formed",
+                      "VERSION constant matches --version arg",
+                      "WORDS count matches active pool",
+                      "OPERATORS = 4 Phase-6 operators",
+                      "ARCHETYPES = 4 active archetypes",
+                      "FIELD_NOTES_RECENT = [] for empty field-notes",
+                      "missing --output rejected"):
+            asserts.append((label, False, "build did not produce file"))
+        passed = sum(1 for _, ok, _ in asserts if ok)
+        total = len(asserts)
+        first_fail = next(((label, detail) for label, ok, detail in asserts if not ok), None)
+        return {
+            "available": True,
+            "passed": False,
+            "passes": passed,
+            "total": total,
+            "asserts": [(label, ok) for label, ok, _ in asserts],
+            "first_fail": first_fail,
+        }
+
+    text = out_html.read_text(encoding="utf-8")
+
+    ok_2 = (text.startswith("<!DOCTYPE html>")
+            and "<head>" in text and "<body>" in text
+            and "</body>" in text and "</html>" in text)
+    asserts.append(("HTML well-formed", ok_2, ""))
+
+    ok_3 = 'const VERSION = "0.12.0-test"' in text
+    asserts.append(("VERSION constant matches --version arg", ok_3, ""))
+
+    expected_pool = [
+        line.strip()
+        for line in words.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+    retired_set: set[str] = set()
+    if retired.exists():
+        retired_set = {
+            line.strip()
+            for line in retired.read_text(encoding="utf-8").splitlines()
+            if line.strip() and not line.startswith("#")
+        }
+    expected_active = [w for w in expected_pool if w not in retired_set]
+    import re as re_mod
+    words_match = re_mod.search(r"const WORDS = (\[.*?\]);", text, re_mod.DOTALL)
+    ok_4 = False
+    detail_4 = ""
+    if words_match:
+        try:
+            inlined_words = json.loads(words_match.group(1))
+            ok_4 = (len(inlined_words) == len(expected_active))
+            if not ok_4:
+                detail_4 = f"expected {len(expected_active)}, found {len(inlined_words)}"
+        except json.JSONDecodeError as exc:
+            detail_4 = f"WORDS JSON parse failed: {exc}"
+    else:
+        detail_4 = "WORDS const not found in output"
+    asserts.append(("WORDS count matches active pool", ok_4, detail_4))
+
+    ok_5 = ('"reversal"' in text and '"exaggeration"' in text
+            and '"escape"' in text and '"wishful-thinking"' in text
+            and 'const OPERATORS = [' in text)
+    asserts.append(("OPERATORS = 4 Phase-6 operators", ok_5, ""))
+
+    ok_6 = all(a in text for a in (
+        '"first-principles-jester"', '"labyrinth-librarian"',
+        '"systems-alchemist"', '"radagast-brown"'))
+    asserts.append(("ARCHETYPES = 4 active archetypes", ok_6, ""))
+
+    empty_fn = tmp_dir / "empty-fn.md"
+    empty_fn.write_text(
+        "# Empty\n\n## Log\n\n"
+        "| # | Timestamp | Archetype | Word | Operator | Topic slug | Output file | "
+        "Re-rolled | Kept | Retire-word | Voice-off | Review1-Votum |\n"
+        "|---|-----------|-----------|------|----------|------------|"
+        "-------------|-----------|------|-------------|-----------|---------------|\n",
+        encoding="utf-8",
+    )
+    out_empty = tmp_dir / "playground-empty-fn.html"
+    subprocess.run(
+        [sys.executable, str(build_script),
+         "--output", str(out_empty),
+         "--words", str(words), "--retired", str(retired),
+         "--po-operators", str(po_operators),
+         "--field-notes", str(empty_fn),
+         "--version", "0.12.0-test"],
+        capture_output=True, text=True, timeout=10,
+    )
+    text_empty = out_empty.read_text(encoding="utf-8") if out_empty.exists() else ""
+    ok_7 = "const FIELD_NOTES_RECENT = []" in text_empty
+    asserts.append(("FIELD_NOTES_RECENT = [] for empty field-notes",
+                    ok_7, "" if ok_7 else "expected empty array"))
+
+    proc = subprocess.run(
+        [sys.executable, str(build_script),
+         "--words", str(words), "--retired", str(retired),
+         "--po-operators", str(po_operators)],
+        capture_output=True, text=True, timeout=10,
+    )
+    ok_8 = (proc.returncode != 0)
+    asserts.append(("missing --output rejected",
+                    ok_8, "" if ok_8 else f"rc={proc.returncode}"))
+
+    passed = sum(1 for _, ok, _ in asserts if ok)
+    total = len(asserts)
+    first_fail = next(((label, detail) for label, ok, detail in asserts if not ok), None)
+    return {
+        "available": True,
+        "passed": passed == total,
+        "passes": passed,
+        "total": total,
+        "asserts": [(label, ok) for label, ok, _ in asserts],
+        "first_fail": first_fail,
+    }
+
+
 def stage_c_live_stub(runs: int) -> int:
     print(
         f"[stage C / live mode] Planned {runs} live skill invocations per "
@@ -1153,6 +1306,12 @@ def main() -> int:
                    help="run Stage D (cross-pollination linter smoke)")
     p.add_argument("--wishful", action="store_true",
                    help="run Stage E (wishful-thinking picker smoke)")
+    p.add_argument("--build-playground", type=Path, default=None,
+                   help="path to build_playground.py for Stage F smoke")
+    p.add_argument("--po-operators", type=Path, default=None,
+                   help="path to po-operators.md (required for Stage F)")
+    p.add_argument("--playground", action="store_true",
+                   help="run Stage F (playground build smoke)")
     p.add_argument("--report-out", required=True, type=Path)
     p.add_argument("--picker-runs", type=int, default=50)
     p.add_argument("--strict-voice", action="store_true")
@@ -1246,6 +1405,22 @@ def main() -> int:
             args.field_notes_template, tmp_dir,
         )
 
+    playground_results: dict | None = None
+    if args.playground:
+        if not args.build_playground:
+            print("error: --build-playground is required when --playground is set",
+                  file=sys.stderr)
+            return 2
+        if not args.po_operators:
+            print("error: --po-operators is required when --playground is set",
+                  file=sys.stderr)
+            return 2
+        print("running playground build smoke test...", file=sys.stderr)
+        playground_results = stage_f_playground_build_smoke(
+            args.build_playground, args.words, args.retired,
+            args.po_operators, tmp_dir,
+        )
+
     meta = {
         "date": dt.date.today().isoformat(),
         "picker_runs": args.picker_runs,
@@ -1255,7 +1430,8 @@ def main() -> int:
     }
     report = render_report(picker_results, corpus_results, meta,
                            telemetry_results, run_planner_results,
-                           compact_results, cp_results, wishful_results)
+                           compact_results, cp_results, wishful_results,
+                           playground_results)
     args.report_out.parent.mkdir(parents=True, exist_ok=True)
     args.report_out.write_text(report, encoding="utf-8")
     print(f"report written: {args.report_out}", file=sys.stderr)
