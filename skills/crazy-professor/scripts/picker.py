@@ -242,9 +242,10 @@ def main() -> int:
     p.add_argument("--force-archetype", choices=ARCHETYPES, help="bypass mod-4 picker")
     p.add_argument("--force-timestamp", help="ISO-8601 UTC override (testing)")
     p.add_argument("--wishful-share", type=float, default=0.25,
-                   help="relative weight for wishful-thinking operator. "
-                        "0.0 = disabled (3-operator legacy), 1.0 = equal 25%% each "
-                        "(default 0.25 = ~14%% wishful, ~28.6%% each base operator)")
+                   help="relative weight for wishful-thinking operator (weights = "
+                        "[1, 1, 1, share*3]). 0.0 = disabled (3-operator legacy). "
+                        "0.333 = equal 25%% each. 1.0 = wishful ~50%% (weights [1,1,1,3]). "
+                        "Default 0.25 = ~14%% wishful, ~28.6%% each base operator.")
     args = p.parse_args()
     if args.wishful_share < 0.0 or args.wishful_share > 1.0:
         print(f"error: --wishful-share must be in [0.0, 1.0] (got {args.wishful_share})",
