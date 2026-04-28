@@ -13,13 +13,18 @@ Schema (per run, single-mode):
     topic_slug          str    short kebab slug or "" if not provided
     archetype           str    final picked archetype (post-variation-guard)
     word                str    final picked word
-    operator            str    "reversal" | "exaggeration" | "escape"
+    operator            str    "reversal" | "exaggeration" | "escape" | "wishful-thinking"
     re_rolled           str    "no" | "archetype" | "word" | "both" | "forced-archetype" | ...
     distiller_used      bool   true if codex round-2 distiller ran
     round2_status       str    "n/a" | "ok" | "skipped" | "failed"
     time_to_finish_ms   int    wall-clock ms from picker to validator-pass
     voice_cross_drift_hits int  count from lint_voice.py FAIL/WARN findings
     lint_pass           bool   true if all linters pass strict-mode
+
+Optional fields (since v0.11.0; backward-compatible -- readers ignore unknowns):
+    compact_mode        bool   true if --chat --compact was active
+    low_substance_hits  int    findings count from lint_cross_pollination.py
+    wishful_thinking_active  bool  true if any picked operator was wishful-thinking
 
 Schema (per run, chat-mode):
     run_id              str    "<utc-iso>--chat--<slug>"
