@@ -1,6 +1,6 @@
 ---
 title: crazy-professor Chat-Mode Flow Specification
-version: 0.11.0
+version: 0.12.0
 status: in v0.10.0 (no flow change since v0.5.1; embedded version mirrors plugin version)
 created: 2026-04-23
 related_plan: docs/plans/2026-04-23-crazy-professor-v050-chat-mode-master-plan.md
@@ -186,7 +186,7 @@ Pro Chat-Run eine Datei unter
 ---
 skill: crazy-professor
 mode: chat
-version: 0.11.0
+version: 0.12.0
 timestamp: <ISO>
 topic: "<topic>"
 archetypes: [jester, librarian, alchemist, radagast-brown]

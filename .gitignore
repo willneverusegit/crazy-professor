@@ -1,4 +1,5 @@
 .agent-memory/
+.superpowers/
 *.stackdump
 *.tmp
 *.temp

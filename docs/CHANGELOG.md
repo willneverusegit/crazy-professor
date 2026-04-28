@@ -4,6 +4,20 @@ Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versio
 
 ---
 
+## [v0.12.0] [2026-04-28] Phase 7 — Single-File-HTML-Playground
+
+**Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil ein neues user-visible Subsystem (HTML-Playground + Slash-Command-Flag) hinzukommt. Master-Plan-Phase 7 abgeschlossen (6/8 → 7/8 Phasen).
+
+- **7.1 `/crazy --playground`-Flag**: triggert das neue Build-Skript `scripts/build_playground.py`, schreibt frisches HTML nach `playground/index.html`, oeffnet via `webbrowser.open()`. Reject-Matrix gegen `--chat`/`--from-session`/`--dry-run`/`--compact`/`--strict-cross-pollination`.
+- **7.2 Browser-Playground (Single-File-HTML)**: Cockpit-Layout mit Topic-Input + 3-Element-Picker (Archetype/Word/Operator), Roll-All und per-Element-Re-Roll-Buttons, Live-Prompt-Output mit Copy-Button. Field-notes-Footer zeigt letzten Archetype + Streak-Warnung. Pure-Static (inlined Daten + JS), `file://`-tauglich, kein Server.
+- **7.3 `picker.py --force-word` und `--force-operator`**: zwei neue Flags analog zu `--force-archetype`. Variation-Guard schlaegt Force konsistent. Neue `re_rolled`-Werte (`forced-word`, `forced-operator`, kombinierte Marker mit `+`).
+- **7.4 Build-Skript `build_playground.py`** (~480 LOC, stdlib-only): liest Resources, parsed `po-operators.md` fuer die 4 Operator-Namen, liest optional die letzten 10 field-notes-Rows, generiert HTML mit inlined JS-Constants (CSS_BLOCK + JS_BLOCK module-level constants). Idempotent.
+- **Eval-Suite Stage F (neu)** mit 8 deterministischen Asserts: Build-Skript-Smoke, HTML-Wohlgeformtheit, VERSION/WORDS/OPERATORS/ARCHETYPES-Konsistenz, FIELD_NOTES_RECENT-Inlining, Reject-ohne-required-Args.
+- **Telemetrie**: keine Aenderung (Klaerung 7-(c) — Schema-Pause respektiert Phase-6-Active-Warning). Browser-Runs erscheinen in Telemetrie als normale CLI-Runs mit `forced-`-Markern.
+- **Workflow-Pattern**: brainstorming → spec → plan → executing-plans (inline) — dritte vollstaendige Anwendung nach Phase 5+6.
+
+---
+
 ## [v0.11.0] [2026-04-28] Phase 6 — Cross-Pollination + Kompakt-Modus
 
 **Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil zwei neue user-facing Flags (`--chat --compact`, `--strict-cross-pollination`) und ein 4. PO-Operator (`wishful-thinking`) als kontrolliertes Feldtest-Set aktiviert werden. Master-Plan-Phase 6 abgeschlossen (5/8 → 6/8 Phasen).

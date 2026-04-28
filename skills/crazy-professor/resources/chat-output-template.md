@@ -12,7 +12,7 @@ Pfad: `.agent-memory/lab/crazy-professor/chat/YYYY-MM-DD-HHMM-<topic-slug>.md`
 skill: crazy-professor
 mode: chat
 compact: <true | false>
-version: 0.11.0
+version: 0.12.0
 timestamp: <ISO-8601 UTC>
 topic: "<user input, one line, unmodified>"
 archetypes: [first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown]

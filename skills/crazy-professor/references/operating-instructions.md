@@ -322,6 +322,14 @@ fields once enough data accumulates.
 All three fields keep the Phase-4 contract: new fields must be optional,
 never required. Readers ignore unknown fields.
 
+**Phase 7 (since v0.12.0):** No new telemetry fields. Browser-triggered
+runs from `/crazy --playground` produce a normal terminal `/crazy <topic>
+--force-archetype X --force-word Y --force-operator Z` invocation;
+telemetry sees them as standard single-runs with `forced-` markers in
+the `re_rolled` field. Distinguishing browser-vs-direct-CLI is
+intentionally out of scope (Phase-9 candidate if data analysis later
+needs the distinction).
+
 **Step 7c: Optional patch-suggestion-loop (since v0.9.0).** If the
 single-mode run count is a non-zero multiple of 10 (count rows in
 field-notes.md Log table where `archetype != all-4 (chat-mode)`), call:

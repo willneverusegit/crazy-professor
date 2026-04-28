@@ -2,17 +2,17 @@
 
 - skill version: 0.12.0
 - picker runs per archetype: 50
-- corpus dir: `C:\Users\domes\AppData\Local\Temp\tmpacq0oikw\corpus`
+- corpus dir: `C:\Users\domes\AppData\Local\Temp\tmp88kztvph\corpus`
 - voice strict mode: False
 
 ## Picker (Stage B static)
 
 | Archetype | Runs | OK | Pass-Rate | Unique Words | Operator Dist |
 |---|---|---|---|---|---|
-| first-principles-jester | 50 | 50 | 100.0% | 43 | escape=11, exaggeration=12, reversal=14, wishful-thinking=13 |
-| labyrinth-librarian | 50 | 50 | 100.0% | 43 | escape=12, exaggeration=11, reversal=18, wishful-thinking=9 |
-| systems-alchemist | 50 | 50 | 100.0% | 41 | escape=15, exaggeration=17, reversal=9, wishful-thinking=9 |
-| radagast-brown | 50 | 50 | 100.0% | 40 | escape=15, exaggeration=11, reversal=13, wishful-thinking=11 |
+| first-principles-jester | 50 | 50 | 100.0% | 43 | escape=16, exaggeration=10, reversal=12, wishful-thinking=12 |
+| labyrinth-librarian | 50 | 50 | 100.0% | 45 | escape=11, exaggeration=12, reversal=14, wishful-thinking=13 |
+| systems-alchemist | 50 | 50 | 100.0% | 45 | escape=22, exaggeration=11, reversal=11, wishful-thinking=6 |
+| radagast-brown | 50 | 50 | 100.0% | 41 | escape=11, exaggeration=15, reversal=15, wishful-thinking=9 |
 
 All picker runs returned valid JSON with expected schema.
 
@@ -30,7 +30,7 @@ Operator coverage across all archetypes: ['escape', 'exaggeration', 'reversal', 
 ## Telemetry smoke (Stage B)
 
 PASS -- append + round-trip + summary (summary OK)
-- temp file: `C:\Users\domes\AppData\Local\Temp\tmpacq0oikw\.eval-tmp-n27mraqu\telemetry-smoke.jsonl`
+- temp file: `C:\Users\domes\AppData\Local\Temp\tmp88kztvph\.eval-tmp-0bm481gv\telemetry-smoke.jsonl`
 
 ## Run Planner smoke (Stage B)
 

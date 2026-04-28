@@ -662,7 +662,7 @@ def stage_c_compact_smoke(validator: Path, tmp_dir: Path) -> dict:
     normal_chat = """---
 skill: crazy-professor
 mode: chat
-version: 0.11.0
+version: 0.12.0
 timestamp: 2026-04-29T12:00:00Z
 topic: "smoke"
 archetypes: [first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown]
@@ -770,8 +770,8 @@ Description.
 """
 
     compact_chat = normal_chat.replace(
-        "mode: chat\nversion: 0.11.0",
-        "mode: chat\ncompact: true\nversion: 0.11.0",
+        "mode: chat\nversion: 0.12.0",
+        "mode: chat\ncompact: true\nversion: 0.12.0",
     )
     parts = compact_chat.split("## Round 1")
     head = parts[0]
@@ -820,8 +820,8 @@ Description.
                     ok_3, "" if ok_3 else f"rc={rc}, err={err.strip()[:120]}"))
 
     bad_compact = normal_chat.replace(
-        "mode: chat\nversion: 0.11.0",
-        "mode: chat\ncompact: true\nversion: 0.11.0",
+        "mode: chat\nversion: 0.12.0",
+        "mode: chat\ncompact: true\nversion: 0.12.0",
     )
     rc, err = call_validator(bad_compact)
     ok_4 = (rc != 0 and "compact-mode order violation" in err)
@@ -1052,7 +1052,7 @@ def stage_e_wishful_smoke(picker: Path, words: Path, retired: Path,
     fixture.write_text("""---
 skill: crazy-professor
 mode: single
-version: 0.11.0
+version: 0.12.0
 timestamp: 2026-04-29T12:00:00Z
 topic: "smoke"
 archetype: first-principles-jester

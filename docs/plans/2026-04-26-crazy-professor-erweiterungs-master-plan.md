@@ -24,7 +24,7 @@ Der crazy-professor ist konzeptuell stark, dokumentationstechnisch dicht, aber *
 | 4     | **Telemetrie & Lernschleife**                                        | JSONL/SQLite-Run-Log; Variation-Guard-/Museum-Clause-Beobachtbarkeit; Patch-Suggestion-Loop alle 10 Runs | ✅ (2026-04-27)     |
 | 5     | **Run Planner**                                                      | Archetype-Selector + `--from-session` als gemeinsame Schicht; `--dry-run` für Picker-Vorschau           | ✅ (2026-04-28)     |
 | 6     | **Cross-Pollination + Kompakt-Modus**                                | `--chat --compact`; Round-2-Substanz-Check (`--strict-cross-pollination`); 4. PO-Operator aktiviert      | ✅ (2026-04-28)     |
-| 7     | **Visionäre Erweiterung — GUI/Playground** (optional, später)        | Single-File-HTML-Playground analog zur `playground` Skill; Browse/Compare/Keep/Retire UI                | ⏳     |
+| 7     | **Visionäre Erweiterung — GUI/Playground** (optional, später)        | Single-File-HTML-Playground analog zur `playground` Skill; Browse/Compare/Keep/Retire UI                | ✅ (2026-04-28)     |
 | 8     | **Visionäre Erweiterung — Telegram-Bridge** (optional, später, RISIKO) | Bot-Adapter für mobile Trigger; Security-Audit als Vorbedingung                                         | ⏳     |
 
 Status-Symbole: ✅ erledigt / 🟡 in Arbeit / ⏳ geplant / ❌ blockiert

@@ -74,6 +74,11 @@ User Prompt / "crazy professor" / /crazy <topic>
 - **Aufgabe:** Pre-Write-Quality-Gates. `lint_voice` prueft Lexicon-Gate pro Archetype. `lint_word_pool` prueft Wort-Pool-Integritaet. `lint_cross_pollination` prueft R2-Items in Chat-Mode-Output auf Marker-Existenz, Ref-Aufloesung und Token-Overlap mit Ref (warn-only, exit 0 immer). Aktiviert nur via `--strict-cross-pollination`. `validate_output` prueft Format-Drift und seit v0.11.0 die Compact-Mode-Reihenfolge.
 - **Abhaengigkeiten:** Stdlib-only. `lint_cross_pollination` liest `resources/stop-words.txt`.
 
+### Browser-Playground (seit v0.12.0)
+- **Datei(en):** `skills/crazy-professor/scripts/build_playground.py` (Build-Skript) + `skills/crazy-professor/playground/index.html` (gebautes Output) + Cockpit-Layout (CSS_BLOCK + JS_BLOCK module-level constants).
+- **Aufgabe:** Browser-Playground als visuelle Schicht fuer den Picker. Build-Skript liest Resources zur Build-Zeit, generiert single-file HTML mit inlined Daten (kein HTTP-Server, `file://`-tauglich). Browser ist Pure-Picker + Prompt-Builder + Copy-Helper -- kein LLM-Call, kein File-System-Access. User kopiert generierten Prompt zurueck ins Terminal als normaler `/crazy <topic> --force-archetype X --force-word Y --force-operator Z`-Aufruf.
+- **Abhaengigkeiten:** Stdlib-only Python fuer den Build. HTML5 + vanilla JavaScript (Clipboard API) fuer den Browser-Teil. Picker-Force-Flags (Phase 7) machen den Browser-Output validierbar gegen den CLI-Picker.
+
 ### Codex-Subagent (extern)
 - **Datei(en):** Plugin `codex` mit `codex:codex-rescue` Skill
 - **Aufgabe:** Round-3-Distillation in Chat-Mode. Bekommt bis zu 32 Provokationen, gibt 20 Final-Ideen + Top-3 Cross-Pollination + Next-Experiment zurueck.
