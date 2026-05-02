@@ -17,136 +17,45 @@ description: >
   "radagast der braune", "cozy provocation", "gentler nudge", "waldhaft".
   Chat-Mode (`--chat` flag, since v0.5.0): four archetypes in 3-round
   distilled dialog producing curated 20-idea output (5 per archetype)
-  with Codex-based scoring. Trigger phrases for Chat-Mode: "chat mode",
-  "chat-mode", "alle archetypen", "alle stimmen", "kuratierte ideen",
-  "20 ideen", "destilliere", "crazy professor chat", "crazy chat".
+  with Codex-based scoring. Lab (`--lab` flag, since v0.13.0): opens a
+  static review browser for triaging existing outputs.
 metadata:
   author: domes
-  version: '0.12.0'
+  version: '0.13.0'
   part-of: crazy-professor
   layer: divergence
-  status: V1 + Chat-Mode
+  status: V1 + Chat-Mode + Lab (Phase 4-8 rolled back)
   user_invocable: true
 ---
 
 # Crazy Professor
 
-Divergence generator for creative ideation. Not an advisor. Not a coach.
-A deliberately unhinged thinker whose only job is to produce strange but
-anchored provocations the user would not have reached on their own.
+Divergence generator for creative ideation. Not an advisor. Not a
+coach. A deliberately unhinged thinker whose only job is to produce
+strange but anchored provocations the user would not have reached on
+their own.
 
 ## German Trigger Phrases (body-level, not in frontmatter)
 
-The plugin catalog enforces English trigger phrases in YAML frontmatter.
-The user works primarily in German. The following German phrases should
-also activate this skill when the user writes them in chat:
+The plugin catalog enforces English trigger phrases in YAML
+frontmatter. The user works primarily in German. The following German
+phrases should also activate this skill:
 
 "verrueckter professor", "professor", "spinn herum", "bring mich raus
 aus der spur", "gib mir wilde ideen", "steck mich fest", "ideen
 ausbrechen", "wilde provokationen", "das ist zu normal", "brauche was
 verdrehtes", "zu gerade gedacht", "stoss mich an".
 
-For German trigger phrases, invoke this skill the same way as for the
-English triggers.
-
 ## Modes
 
-**Single-Run (default, V1):**
+| Trigger | Mode | Output |
+|---|---|---|
+| `/crazy <topic>` | Single-Run (default, ~30s, 1 LLM call) | 10 provocations + 1 next experiment |
+| `/crazy <topic> --chat` | Chat-Mode (~2-4 min, ~10 LLM calls + Codex) | 4×5 distilled ideas + Top-3 + 1 next experiment |
+| `/crazy --lab` | Lab (browser-only, no LLM) | Static review surface for an existing output |
 
-```
-Skill crazy-professor "<topic>"
-```
-
-One archetype, 10 provocations, one next-experiment. ~30s, 1 LLM call.
-The fastest mode.
-
-**Chat-Mode (`--chat`):**
-
-```
-Skill crazy-professor "<topic>" --chat
-```
-
-Four archetypes in a 3-round sequence, producing a curated 20-idea
-output (5 per archetype). ~10 LLM calls, ~2-4 min wall-clock, one
-Codex-rescue call for distillation (with Claude fallback). Cost the
-deliberateness — see `<repo-root>/docs/chat-mode-flow.md` for the
-canonical flow spec.
-
-When to use which:
-
-- **Single-Run** for ambient topics, quick single-lens divergence, when
-  Codex is unavailable, or when the topic is narrow enough.
-- **Chat-Mode** for topics that benefit from multiple lenses, when the
-  user wants ranked ideas with rubric scores, and the user is willing
-  to spend the calls.
-
-Chat-Mode is NOT a replacement for Single-Run. It sits alongside.
-
-## What It Does (Single-Run, summary)
-
-On each call, the skill:
-
-1. Picks **one of four archetypes** deterministically from a timestamp
-   seed: `first-principles-jester`, `labyrinth-librarian`,
-   `systems-alchemist`, `radagast-brown`.
-2. Picks **one provocation word** from
-   `<repo-root>/skills/crazy-professor/resources/provocation-words.txt`
-   (single words and 2-3-token phrases both valid).
-3. Picks **one De Bono PO-operator**: `reversal`, `exaggeration`, or `escape`.
-4. Produces **exactly 10 provocations** to the user's topic, anchored in
-   the user's existing infrastructure (agentic-os, devil-advocate-swarms,
-   notebooklm, skill-system, todos.db, ISSUES2FIX, Codex/Claude CLI,
-   Obsidian-Wiki, .agent-memory).
-5. Picks **one** of the 10 provocations as the "next small experiment"
-   and names it in a separate final section.
-6. Writes the output as a Markdown file to
-   `.agent-memory/lab/crazy-professor/YYYY-MM-DD-HHMM-<topic-slug>.md`.
-7. Appends a row to `field-notes.md` with picker values and review
-   placeholders.
-
-Since v0.7.0 / v0.8.0 / v0.9.0, seven helper scripts live at
-`<repo-root>/skills/crazy-professor/scripts/`:
-
-- `picker.py` (v0.7.0) — deterministic stochastic-element selection with
-  built-in variation-guard. Replaces the prose mod-4 mechanic with a
-  callable command. Output is JSON on stdout. Used as the preferred
-  path in Step 2/2b.
-- `validate_output.py` (v0.7.0) — format-drift detector for both single
-  and chat-mode outputs. Used as a pre-write check in Step 6.
-- `lint_voice.py` (v0.8.0) — per-archetype lexicon enforcement. Reads
-  the Lexicon-Gate YAML block at the bottom of each
-  `prompt-templates/<archetype>.md`, checks each provocation for
-  required vocabulary (warn) and forbidden cross-archetype vocabulary
-  (error). Used as a pre-write check in Step 5b, before the format
-  validator. Warn-only by default; `--strict` makes warns block too.
-- `lint_word_pool.py` (v0.8.0) — pre-commit guard for
-  `provocation-words.txt` and `retired-words.txt`. Catches duplicates,
-  case drift, multi-word format violations, whitespace bugs, and
-  retired/active overlap. Run by hand or via `scripts/run_linters.sh`;
-  not invoked per skill run.
-- `eval_suite.py` (v0.8.0) — evaluation harness. Stage B (default):
-  50 picker runs per archetype + lint+validate sweep over a corpus
-  directory of past outputs, writes a baseline report to
-  `docs/eval-baseline-<date>.md`. Stage C (`--live`): hook for live
-  skill invocations, currently a stub (live runs need Claude/Codex
-  orchestration). Also smoke-tests telemetry append since v0.9.0.
-- `telemetry.py` (v0.9.0) — append-only JSONL run log with schema
-  validation. Subcommands `log`, `summary`, `default-path`. Used in
-  Step 7b (single) and Step C7b (chat). Default path lives next to
-  `field-notes.md` in the lab corpus.
-- `patch_suggester.py` (v0.9.0) — patch-suggestion-loop. Every 10
-  single-mode runs, reads field-notes `kept`/`retire`/`voice-off`
-  markers and writes a non-automatic suggestion file to
-  `lab/crazy-professor/patches/YYYY-MM-DD-suggestion-N.md`. Suggestions
-  are NEVER applied automatically. Used in Step 7c.
-
-All seven scripts are stdlib-only Python and optional. If Python is not
-available the prose mechanic still works (picker fallback is documented
-in operating-instructions). The validators degrade gracefully if not
-called -- they are pre-write checks, not gating runtime requirements.
-
-The full step-by-step including Variation-Guard logic, Chat-Mode steps
-C1-C8, and the topic-resolution contract lives in
+The full step-by-step (Steps 1-5 single, C1-C6 chat, L1 lab, plus the
+topic-resolution contract) lives in
 `<repo-root>/skills/crazy-professor/references/operating-instructions.md`.
 Load that file before generating any output.
 
@@ -155,7 +64,7 @@ Load that file before generating any output.
 The full Hard Rules block (output-is-never-advice, warning-banner,
 goal-respect, anchor-or-it-doesnt-count, exactly-one-experiment,
 no-cross-archetype-contamination), plus Museum-Clause, Chat-Mode
-Museum-Clause, Field-Test-Rule, Radagast-Activation-Gate, and Review
+Museum-Clause, Field-Test-Rule, Radagast-Activation status, and Review
 Rubric, lives in
 `<repo-root>/skills/crazy-professor/references/hard-rules.md`. Load
 that file before generating any output.
@@ -167,44 +76,31 @@ that file before generating any output.
 | `first-principles-jester` | Illegalizes conventions. Breaks down a habit into atoms, declares one atom illegal, rebuilds. | Naive, playful, never cynical. |
 | `labyrinth-librarian` | Imports mechanisms from distant fields. Opens in mykology/meteorology/ornithology/architecture, translates the mechanism back. | Quiet, learned, never pedantic. |
 | `systems-alchemist` | Rewires flows. Maps the topic as input/output/overflow/leak/wall and re-routes one element. | Precise, observational, like a process engineer drawing a flow diagram. |
-| `radagast-brown` | Protects the useful-uselessness. Asks what needs care, shelter, slowness -- defends a part of the system against optimization. | Softly distracted but never dumb. Speaks in living creatures and natural time (seasons, weather, dusk). |
+| `radagast-brown` | Protects the useful-uselessness. Asks what needs care, shelter, slowness — defends a part of the system against optimization. | Softly distracted but never dumb. Speaks in living creatures and natural time. |
 
-See `<repo-root>/skills/crazy-professor/prompt-templates/first-principles-jester.md`,
-`<repo-root>/skills/crazy-professor/prompt-templates/labyrinth-librarian.md`,
-`<repo-root>/skills/crazy-professor/prompt-templates/systems-alchemist.md`,
-`<repo-root>/skills/crazy-professor/prompt-templates/radagast-brown.md`
-for the full voice rules and verbotenes Vokabular of each.
+See the four files in
+`<repo-root>/skills/crazy-professor/prompt-templates/` for full voice
+rules and verbotenes Vokabular per archetype. The `radagast-brown.md`
+template additionally carries the Activation Amendments (binding
+conditions for Radagast outputs since 2026-04-23).
 
-For functional guidance on **which archetype to pick deliberately**
-(instead of letting mod-4 decide) and an optional four-phase sequence
-(`Jester -> Librarian -> Alchemist -> Radagast`), see
-`<repo-root>/skills/crazy-professor/references/usage-patterns.md`.
-That document is a user heuristic, not a skill rule — the skill itself
-stays a single-shot randomized picker.
+## Helper Script
 
-## Out-of-Scope (deliberate)
+Single Python helper, stdlib-only:
 
-- **V1**: no `--deep` debate mode, no multi-agent calls, no model routing.
-- **Chat-Mode**: no tmux live-dialog, no Telegram bridge, no model-mix
-  routing (Claude rounds 1-2 + Codex round 3 is fixed), no multi-topic
-  batches, no auto-schedule.
-
-Design intent for deferred features (stage-magician V1.1, `--deep` V2,
-Telegram bridge V3) is preserved in
-`<repo-root>/skills/crazy-professor/references/roadmap.md`. None of
-these are built. The Erweiterungs-Master-Plan in
-`<repo-root>/docs/plans/2026-04-26-crazy-professor-erweiterungs-master-plan.md`
-schedules Picker-Skript, Linter-Trio, Eval-Suite, Telemetrie,
-Run-Planner, and optional GUI/Telegram as Phases 2-8.
+- `picker.py` — deterministic stochastic-element selection with
+  built-in variation-guard. Reads `field-notes.md`, the active word
+  pool, and the retired list. Writes JSON to stdout. Modes: `--mode
+  single` (default), `--mode chat`. The skill's only required external
+  call. If Python is unavailable, prose fallback in
+  `operating-instructions.md` Step 2.
 
 ## Path Convention
 
-All file paths in this SKILL.md and in the load-on-demand references
-(`<repo-root>/skills/crazy-professor/references/operating-instructions.md`
-and `<repo-root>/skills/crazy-professor/references/hard-rules.md`) are
-written relative to the **plugin repo root** (`<repo-root>` =
-`crazy-professor/`). This makes them resolvable regardless of which
-file the reader is currently in.
+All file paths in this SKILL.md, in `references/`, and in
+`commands/crazy.md` are written relative to the plugin repo root
+(`<repo-root>` = `crazy-professor/`). This makes them resolvable
+regardless of which file the reader is currently in.
 
 ## File Layout
 
@@ -218,42 +114,35 @@ crazy-professor/                              (repo root = plugin root)
 |-- docs/
 |   |-- PROJECT.md, CAPABILITIES.md, ARCHITECTURE.md, CHANGELOG.md
 |   |-- chat-mode-flow.md                     (canonical flow spec)
-|   \-- plans/                                (master plans)
+|   |-- VERSIONING.md
+|   |-- plans/                                (master plans + historical phase plans)
+|   \-- specs/                                (active specs only)
 \-- skills/
     \-- crazy-professor/
-        |-- SKILL.md                          (this file, ~150 lines)
+        |-- SKILL.md                          (this file, ~125 lines)
         |-- prompt-templates/
         |   |-- first-principles-jester.md
         |   |-- labyrinth-librarian.md
         |   |-- systems-alchemist.md
-        |   |-- radagast-brown.md
+        |   |-- radagast-brown.md             (with Activation Amendments)
         |   |-- chat-round-1-wrapper.md
         |   |-- chat-round-2-wrapper.md
         |   \-- chat-curator.md
-        |-- references/                       (load-on-demand detail docs)
-        |   |-- operating-instructions.md     (Steps 1-7 + C1-C8)
-        |   |-- hard-rules.md                 (Hard Rules + Museum + Field-Test)
-        |   |-- radagast-activation.md
-        |   |-- review-rubric.md
-        |   |-- roadmap.md
-        |   |-- chat-mode-flow.md             (stub → docs/chat-mode-flow.md)
-        |   \-- usage-patterns.md
+        |-- references/                       (load-on-demand)
+        |   |-- operating-instructions.md     (Steps 1-5, C1-C6, L1)
+        |   |-- hard-rules.md
+        |   \-- roadmap.md
         |-- resources/
         |   |-- provocation-words.txt
         |   |-- retired-words.txt
         |   |-- po-operators.md
-        |   |-- field-notes-init.md           (template for fresh field-notes)
-        |   |-- field-notes-schema.md         (canonical schema spec)
+        |   |-- field-notes-schema.md
         |   |-- output-template.md
         |   \-- chat-output-template.md
-        \-- scripts/                          (stdlib-only Python helpers)
-            |-- picker.py                     (v0.7.0)
-            |-- validate_output.py            (v0.7.0)
-            |-- lint_voice.py                 (v0.8.0, per-archetype lexicon)
-            |-- lint_word_pool.py             (v0.8.0, pool integrity)
-            |-- eval_suite.py                 (v0.8.0, baseline + sweep)
-            |-- telemetry.py                  (v0.9.0, JSONL run log)
-            \-- patch_suggester.py            (v0.9.0, every-10-runs hint)
+        |-- lab/
+        |   \-- index.html                    (static review surface, browser-only)
+        \-- scripts/
+            \-- picker.py                     (the only helper script)
 ```
 
 ## Output Target
@@ -268,3 +157,16 @@ Single + Chat outputs land in the **target project's** `.agent-memory/`
 \-- chat/
     \-- YYYY-MM-DD-HHMM-<topic-slug>.md       (chat-mode output)
 ```
+
+## What Was Removed in v0.13.0
+
+The Phase 4-8 subsystems (telemetry, patch-suggester, run-planner,
+voice/word-pool/cross-pollination linters, eval-suite, telegram
+dialogue scaffold, browser playground, ideation-lab v2 design) were
+rolled back on 2026-05-02. Reason: 18 runs total, 0 telemetry records,
+0 patch suggestions, 0 telegram dialogues — Phase 4-8 was built before
+Phase 1-3 produced a data stream that could justify it. See
+`<repo-root>/docs/CHANGELOG.md` v0.13.0 entry.
+
+If something from those subsystems is later needed: git history is
+the archive (`git show <commit>:<path>` to retrieve).
