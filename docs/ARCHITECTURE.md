@@ -79,6 +79,11 @@ User Prompt / "crazy professor" / /crazy <topic>
 - **Aufgabe:** Browser-Playground als visuelle Schicht fuer den Picker. Build-Skript liest Resources zur Build-Zeit, generiert single-file HTML mit inlined Daten (kein HTTP-Server, `file://`-tauglich). Browser ist Pure-Picker + Prompt-Builder + Copy-Helper -- kein LLM-Call, kein File-System-Access. User kopiert generierten Prompt zurueck ins Terminal als normaler `/crazy <topic> --force-archetype X --force-word Y --force-operator Z`-Aufruf.
 - **Abhaengigkeiten:** Stdlib-only Python fuer den Build. HTML5 + vanilla JavaScript (Clipboard API) fuer den Browser-Teil. Picker-Force-Flags (Phase 7) machen den Browser-Output validierbar gegen den CLI-Picker.
 
+### Telegram Solution Dialogue Scaffold (Phase-8-Draft, seit 2026-04-30)
+- **Datei(en):** `skills/crazy-professor/scripts/telegram_dialogue.py` + `docs/specs/2026-04-30-phase-8-telegram-solution-dialogue.md`
+- **Aufgabe:** Netzwerkfreier Dialogvertrag fuer einen spaeteren Telegram-Bot. Das Skript erzeugt Transcript-Seeds und JSON-Prompt-Packets fuer drei Rollen: Professor (destabilisiert), Claude (synthetisiert), Gate (entscheidet `ACCEPT | CONTINUE | FORCE_SMALL_EXPERIMENT`). Der Loop ist auf `max_rounds` begrenzt und schreibt unter `.agent-memory/lab/crazy-professor/telegram-dialogue/`.
+- **Abhaengigkeiten:** Stdlib-only Python. Keine Telegram-API, kein Bot-Token, kein Webhook. Ein spaeterer Telegram-Adapter darf nur Transport, Allowlist, Rate-Limit und Transcript-Persistenz uebernehmen; Rollenlogik bleibt im Dialogue-Contract.
+
 ### Codex-Subagent (extern)
 - **Datei(en):** Plugin `codex` mit `codex:codex-rescue` Skill
 - **Aufgabe:** Round-3-Distillation in Chat-Mode. Bekommt bis zu 32 Provokationen, gibt 20 Final-Ideen + Top-3 Cross-Pollination + Next-Experiment zurueck.
@@ -117,6 +122,7 @@ Persistenz aktuell ohne strukturiertes Schema und ohne Telemetrie. Phase 2 fuehr
 - **Persona-Drift-Risiko**: Persona-Prompting kann auf wissensschweren Tasks bis zu 30pp Genauigkeit kosten (Search Engine Journal 2024). Hard Rule "Output is never advice" + Warning-Banner im Output-Template adressieren das. Phase-3-Linter erzwingt Pflicht/Verbots-Vokabular pro Archetype und schliesst Voice-Drift weiter ab.
 - **Adoption-Risiko**: Museum-Clause limitiert Adoption-ohne-Evidenz: nach 10 Runs ohne Keeper zieht der Skill sich selbst zurueck.
 - **Telegram-Bridge** (Phase 8): Security-Audit als Vorbedingung. Auth/Input-Validation-Surface, externer Channel.
+- **Telegram Solution Dialogue** (Phase-8-Draft): Live-Transport bleibt blockiert, bis Token-Handling, `chat_id`-Allowlist, Webhook/Polling-Schutz, Rate-Limit, `/stop`-Interrupt und Transcript-Persistenz geprueft sind.
 - Keine Secrets im Repo. Keine Netzwerk-Calls aus dem Skill ausser ueber Codex-Subagent (Round-3) und das Standard-Claude-Code-LLM-API.
 
 ## Deployment

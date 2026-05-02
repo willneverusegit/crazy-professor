@@ -105,6 +105,13 @@ Status-Symbole: ✅ erledigt / 🟡 in Arbeit / ⏳ geplant / ❌ blockiert
 |---|-------|--------|------------|-----------|
 | 8.1 | **Telegram-Bridge** (V3 aus `references/roadmap.md:27-31`): Ductor-Integration, mobiler Trigger via Telegram-Bot. **RISIKO**: Auth/Input-Validation-Surface, externe Channels, Security-Audit als Vorbedingung. Nur sinnvoll, wenn der Skill produktiv genug genutzt wird, dass mobiler Zugang Wert hat. | Konsens (User-bestätigt) | Codex+Claude+User | später |
 
+**Draft 2026-04-30:** Phase 8 beginnt als lokaler Telegram Solution
+Dialogue Scaffold, nicht als Live-Bot. `scripts/telegram_dialogue.py`
+erzeugt Transcript-Seeds und Prompt-Packets fuer Professor, Claude und
+Convergence-Gate. Live-Telegram bleibt blockiert bis Security-Audit,
+Chat-Allowlist, `/stop`-Interrupt, Rate-Limit und Transcript-Persistenz
+bewiesen sind.
+
 ---
 
 ## Konflikt-Log

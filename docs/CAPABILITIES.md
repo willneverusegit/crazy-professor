@@ -33,7 +33,8 @@
 | Browser-Playground (Single-File-HTML) | aktiv | 2026-04-28 (v0.12.0) | Phase 7: Cockpit-Layout. Topic-Input + 3-Element-Picker (Archetype/Word/Operator) mit Roll-All und per-Element-Re-Roll. Live-Prompt-Output mit Copy-Button. Field-notes-Footer mit Streak-Warnung. Pure-Static, `file://`-tauglich. |
 | `picker.py --force-word` und `--force-operator` | aktiv | 2026-04-28 (v0.12.0) | Phase 7: zwei neue Force-Flags analog zu `--force-archetype`. Variation-Guard schlaegt Force konsistent. Neue `re_rolled`-Werte mit `forced-`-Praefix und `+`-Kombinationen. |
 | Build-Skript `build_playground.py` | aktiv | 2026-04-28 (v0.12.0) | `scripts/build_playground.py` (stdlib-only): liest Resources (provocation-words, retired-words, po-operators, optional field-notes), generiert Single-File-HTML mit inlined JS-Constants. Idempotent. 9. stdlib-Skript. |
-| GUI/Playground | optional, geplant | — | Phase 7: Single-File-HTML, Vorbild `playground` Skill |
+| `/crazy --lab` / Ideation Lab v2 Slice 1 | experimentell | 2026-04-30 | Oeffnet den statischen Review-Prototyp unter `skills/crazy-professor/lab/index.html`: pasted Single-Run-Output parsen, Triage mit Wert/Umsetzbarkeit/Systemfit, genau eine Experiment-Card kopieren. Standalone, kein LLM-Call, kein Browser-Filesystem-Write. |
+| Telegram Solution Dialogue Scaffold | experimentell | 2026-04-30 | Phase-8-Draft: `scripts/telegram_dialogue.py` erzeugt Transcript-Seeds und rollenbasierte Prompt-Packets fuer Professor, Claude und Convergence-Gate. Kein Bot, keine Netzwerk-Calls. |
 | Telegram-Bridge | optional, geplant | — | Phase 8: Security-Audit als Vorbedingung, RISIKO |
 | Multi-Provider-Routing | out of scope | — | Codex+Claude reichen |
 | Skill-Mesh-Pipeline | out of scope | — | crazy → plan-merger → executing-plans, interessant aber nicht jetzt |
@@ -57,5 +58,7 @@ Nicht zutreffend — crazy-professor exponiert keinen MCP-Server. Es nutzt das C
 - **Manuelles Triggering**: kein Auto-Schedule, kein Webhook, kein Bot
 - **Single-Topic pro Run**: Chat-Mode kann keinen Multi-Topic-Batch
 - **Keine Modell-Mix-Optionen**: Claude fuer Runde 1+2, Codex fuer Runde 3 ist fix
+- **Ideation Lab nur statisch**: `/crazy --lab` oeffnet Slice 1 nur als paste-only Browser-Review, ohne Output-Generation oder Browser-Dateizugriff
+- **Telegram nur als Scaffold**: Phase 8 hat einen lokalen Dialogvertrag, aber noch keinen Bot, keinen Webhook und keine Netzwerkverbindung
 - **Picker-Skript ist optional**: Plugin laeuft auch ohne Python (Fallback-Prosa-Mechanik in operating-instructions Step 2)
 - **Telemetrie hat 50-MB-Hard-Cap**: bei Überlauf manuelle Rotation/Archivierung notwendig (kein Auto-Rotate)

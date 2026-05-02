@@ -4,6 +4,14 @@ Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versio
 
 ---
 
+## [2026-04-30] Phase 8 Draft -- Telegram Solution Dialogue Scaffold
+
+- **Phase-8-Vertrag spezifiziert**: `docs/specs/2026-04-30-phase-8-telegram-solution-dialogue.md` beschreibt Professor-vs-Claude-vs-Gate-Loop, Stop-Bedingungen, Telegram-Adapter-Grenze und Security-Gate.
+- **Lokaler Scaffold**: neues stdlib-only Skript `skills/crazy-professor/scripts/telegram_dialogue.py`. Es erzeugt Transcript-Seeds und JSON-Prompt-Packets fuer `professor`, `claude` und `gate`. Keine Telegram-API, keine Netzwerk-Calls, keine Tool-Ausfuehrung.
+- **Architektur/Status aktualisiert**: README, PROJECT, CAPABILITIES, ARCHITECTURE und Roadmap markieren Phase 8 als lokalen Draft, nicht als live Bot.
+
+---
+
 ## [v0.12.0] [2026-04-28] Phase 7 — Single-File-HTML-Playground
 
 **Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil ein neues user-visible Subsystem (HTML-Playground + Slash-Command-Flag) hinzukommt. Master-Plan-Phase 7 abgeschlossen (6/8 → 7/8 Phasen).

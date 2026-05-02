@@ -14,7 +14,7 @@ Divergence-Generator als Claude-Code-Plugin: vier Archetypen produzieren strange
 
 ## Aktueller Stand
 
-v0.12.0 released 2026-04-28. Single-Run, Chat-Mode und Browser-Playground aktiv. Master-Plan-Phasen 1-7 abgeschlossen: 1 (Vertragsbereinigung), 2 (Picker-Skript + field-notes-Schema + Output-Validator), 3 (Linter-Trio + Eval-Suite), 4 (Telemetrie + Patch-Suggestion-Loop), 5 (Run-Planner: topic-aware Archetype-Selector + `--from-session` + `--dry-run`), 6 (Cross-Pollination Substanz-Check + Compact-Mode + 4. PO-Operator), 7 (Single-File-HTML-Playground via `/crazy --playground`). Vollständige stdlib-only Python-Toolchain in `scripts/`: picker, validate_output, lint_voice, lint_word_pool, lint_cross_pollination, eval_suite, telemetry, patch_suggester, run_planner, build_playground. Phase 7 hat das Browser-Playground hinzugefügt: Cockpit-Layout mit Topic-Input + 3-Element-Picker, Live-Prompt-Output mit Copy-Button, field-notes-Streak-Warnung. Pure-Static, `file://`-tauglich, kein Server. `picker.py` bekam `--force-word` + `--force-operator` als zwei neue Force-Flags. Phase 8 (Telegram-Bridge, optional, RISIKO) bleibt out-of-scope. Versions-Policy in `docs/VERSIONING.md`.
+v0.12.0 released 2026-04-28. Single-Run, Chat-Mode und Browser-Playground aktiv. Master-Plan-Phasen 1-7 abgeschlossen: 1 (Vertragsbereinigung), 2 (Picker-Skript + field-notes-Schema + Output-Validator), 3 (Linter-Trio + Eval-Suite), 4 (Telemetrie + Patch-Suggestion-Loop), 5 (Run-Planner: topic-aware Archetype-Selector + `--from-session` + `--dry-run`), 6 (Cross-Pollination Substanz-Check + Compact-Mode + 4. PO-Operator), 7 (Single-File-HTML-Playground via `/crazy --playground`). Vollständige stdlib-only Python-Toolchain in `scripts/`: picker, validate_output, lint_voice, lint_word_pool, lint_cross_pollination, eval_suite, telemetry, patch_suggester, run_planner, build_playground. Seit 2026-04-30 existiert ein Phase-8-Draft fuer Telegram Solution Dialogue: `telegram_dialogue.py` erzeugt lokal Transcript-Seeds und Prompt-Packets fuer Professor, Claude und Convergence-Gate. Das ist noch kein Bot und keine Netzwerk-Bridge; Live-Telegram bleibt Security-Audit-gated. Versions-Policy in `docs/VERSIONING.md`.
 
 ## Kernfaehigkeiten
 
@@ -35,13 +35,14 @@ Kurzfassung:
 - [x] Phase 5: Run-Planner (Archetype-Selector + `--from-session` + `--dry-run`) (✅ v0.10.0)
 - [x] Phase 6: `--chat --compact`, `--strict-cross-pollination`, 4. PO-Operator (`wishful thinking`) (✅ v0.11.0)
 - [x] Phase 7: Single-File-HTML-Playground (`/crazy --playground`) (✅ v0.12.0)
-- [ ] Phase 8 (optional, RISIKO): Telegram-Bridge
+- [~] Phase 8 (optional, RISIKO): Telegram Solution Dialogue Scaffold (lokal, kein Bot)
 
 ## Abhaengigkeiten
 
 - Claude Code CLI (Plugin-Host)
 - Codex-Subagent (`codex:codex-rescue`) fuer Chat-Mode Round-3-Distillation, Claude-Fallback verfuegbar
 - Eigene Repo-interne Resources (`provocation-words.txt`, `po-operators.md`, `prompt-templates/`)
+- Fuer live Telegram spaeter: Bot-Token, Chat-Allowlist, Webhook/Polling-Adapter und Security-Audit-Pass
 
 ## Beziehungen zu anderen Projekten
 
