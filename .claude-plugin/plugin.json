@@ -1,5 +1,5 @@
 {
   "name": "crazy-professor",
-  "version": "0.12.0",
-  "description": "Divergence generator for creative ideation. Four active voices (first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown) produce strange but anchored provocations, never advice. Default mode returns 10 provocations; optional --chat mode runs all four voices and distills 20 ideas. Local-only; Telegram bridge is explicitly out of scope."
+  "version": "0.13.0",
+  "description": "Divergence generator for creative ideation. Four active voices (first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown) produce strange but anchored provocations, never advice. Default mode returns 10 provocations; --chat mode runs all four voices and distills 20 ideas; --lab opens a static review browser. Local-only. Phase 4-8 was rolled back in v0.13.0 (see CHANGELOG)."
 }

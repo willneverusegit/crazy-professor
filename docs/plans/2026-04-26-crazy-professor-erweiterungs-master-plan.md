@@ -19,15 +19,17 @@ Der crazy-professor ist konzeptuell stark, dokumentationstechnisch dicht, aber *
 | Phase | Ziel                                                                 | Output                                                                                                  | Status |
 |-------|----------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|--------|
 | 1     | **Vertragsbereinigung & Quick-Wins**                                 | Eindeutige Input-/Trigger-Spec; PROJECT.md+CHANGELOG.md angelegt; chat-mode-flow.md dedupliziert; Mehrwort-Words geklärt | ✅ (2026-04-27)     |
-| 2     | **Picker als Skript + field-notes-Schema**                           | Deterministisches Picker-Skript; field-notes.md-Schema im Repo; Init-Header-Helper; Output-Validator    | ✅ (2026-04-27)     |
-| 3     | **Linter-Trio + Eval-Suite**                                         | Word-Pool-Linter; Pflicht-/Verbotenes-Vokabel-Linter pro Archetype; Eval-Suite (Pass-Rate-Gate)         | ✅ (2026-04-27)     |
-| 4     | **Telemetrie & Lernschleife**                                        | JSONL/SQLite-Run-Log; Variation-Guard-/Museum-Clause-Beobachtbarkeit; Patch-Suggestion-Loop alle 10 Runs | ✅ (2026-04-27)     |
-| 5     | **Run Planner**                                                      | Archetype-Selector + `--from-session` als gemeinsame Schicht; `--dry-run` für Picker-Vorschau           | ✅ (2026-04-28)     |
-| 6     | **Cross-Pollination + Kompakt-Modus**                                | `--chat --compact`; Round-2-Substanz-Check (`--strict-cross-pollination`); 4. PO-Operator aktiviert      | ✅ (2026-04-28)     |
-| 7     | **Visionäre Erweiterung — GUI/Playground** (optional, später)        | Single-File-HTML-Playground analog zur `playground` Skill; Browse/Compare/Keep/Retire UI                | ✅ (2026-04-28)     |
-| 8     | **Visionäre Erweiterung — Telegram-Bridge** (optional, später, RISIKO) | Bot-Adapter für mobile Trigger; Security-Audit als Vorbedingung                                         | ⏳     |
+| 2     | **Picker als Skript + field-notes-Schema**                           | Deterministisches Picker-Skript; field-notes.md-Schema im Repo; Init-Header-Helper; Output-Validator    | ✅ (2026-04-27) — Picker bleibt, Validator in v0.13.0 zurückgebaut |
+| 3     | **Linter-Trio + Eval-Suite**                                         | Word-Pool-Linter; Pflicht-/Verbotenes-Vokabel-Linter pro Archetype; Eval-Suite (Pass-Rate-Gate)         | ✅ (2026-04-27) → ❌ in v0.13.0 zurückgebaut (2026-05-02) |
+| 4     | **Telemetrie & Lernschleife**                                        | JSONL/SQLite-Run-Log; Variation-Guard-/Museum-Clause-Beobachtbarkeit; Patch-Suggestion-Loop alle 10 Runs | ✅ (2026-04-27) → ❌ in v0.13.0 zurückgebaut (2026-05-02) |
+| 5     | **Run Planner**                                                      | Archetype-Selector + `--from-session` als gemeinsame Schicht; `--dry-run` für Picker-Vorschau           | ✅ (2026-04-28) → ❌ in v0.13.0 zurückgebaut (2026-05-02) |
+| 6     | **Cross-Pollination + Kompakt-Modus**                                | `--chat --compact`; Round-2-Substanz-Check (`--strict-cross-pollination`); 4. PO-Operator aktiviert      | ✅ (2026-04-28) → ❌ in v0.13.0 zurückgebaut (2026-05-02), 4. PO-Operator bleibt |
+| 7     | **Visionäre Erweiterung — GUI/Playground** (optional, später)        | Single-File-HTML-Playground analog zur `playground` Skill; Browse/Compare/Keep/Retire UI                | ✅ (2026-04-28) → ❌ in v0.13.0 zurückgebaut (2026-05-02) |
+| 8     | **Visionäre Erweiterung — Telegram-Bridge** (optional, später, RISIKO) | Bot-Adapter für mobile Trigger; Security-Audit als Vorbedingung                                         | ⏳ → ❌ in v0.13.0 zurückgebaut (2026-05-02), Phase-8-Scaffold gelöscht |
 
-Status-Symbole: ✅ erledigt / 🟡 in Arbeit / ⏳ geplant / ❌ blockiert
+Status-Symbole: ✅ erledigt / 🟡 in Arbeit / ⏳ geplant / ❌ blockiert oder zurückgebaut
+
+**Update 2026-05-02:** Phasen 4-8 zurückgebaut. Skill auf Phase-1-3-Stand reduziert (Picker bleibt, Output-Validator + Linter + Telemetrie + Run-Planner + Compact-Mode + Strict-Cross-Pollination + Playground + Telegram-Scaffold raus). Anlass: 18 Runs in field-notes, 0 Telemetrie-Records, 0 Patch-Suggestions, 0 Telegram-Dialoge — Phase 4-8 wurde gebaut bevor Phase 1-3 einen Datenstrom produziert hatte. Siehe `docs/CHANGELOG.md` v0.13.0 Eintrag und `docs/specs/2026-05-02-v013-rueckbau-design.md`.
 
 ---
 

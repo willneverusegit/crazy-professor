@@ -2,7 +2,7 @@
 title: Chat-Mode Runde-2 Prompt-Wrapper (Cross-Pollination)
 purpose: Wird um den Standard-Archetype-Prompt herum gelegt, wenn Chat-Mode Runde 2 laeuft. Der Archetype sieht die 15 Provokationen der anderen drei und produziert 3 Gegen- oder Extend-Provokationen aus seiner Stimme.
 applies_to: [first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown]
-version: 0.12.0
+version: 0.13.0
 ---
 
 # Runde-2 Wrapper (Cross-Pollination)

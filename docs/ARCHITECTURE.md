@@ -2,7 +2,7 @@
 
 ## Ueberblick
 
-crazy-professor ist ein Claude-Code-Plugin mit einer SKILL.md als Haupt-Logik und einem Slash-Command (`/crazy`) als Trigger. Bei Invocation laeuft eine Picker-Phase (Archetype + Wort + Operator), eine Generations-Phase (LLM-Call mit Archetype-spezifischem Prompt-Template), und eine Persistenz-Phase (Output-Datei + field-notes-Logging). Chat-Mode skaliert das auf 4 parallele Archetypen plus eine Codex-Subagent-Distillation.
+crazy-professor ist ein Claude-Code-Plugin mit einer SKILL.md als Haupt-Logik und einem Slash-Command (`/crazy`) als Trigger. Bei Invocation laeuft eine Picker-Phase (Archetype + Wort + Operator), eine Generations-Phase (LLM-Call mit Archetype-spezifischem Prompt-Template), und eine Persistenz-Phase (Output-Datei + field-notes-Logging). Chat-Mode skaliert das auf 4 parallele Archetypen plus eine Codex-Subagent-Distillation. `--lab` öffnet ein statisches HTML zum Triagen bestehender Outputs ohne LLM-Call.
 
 ## Komponentendiagramm
 
@@ -11,31 +11,31 @@ User Prompt / "crazy professor" / /crazy <topic>
        |
        v
   Slash-Command commands/crazy.md
-       |  (parses $ARGUMENTS, dispatches by --chat flag)
+       |  (parses $ARGUMENTS, dispatches by --chat / --lab flags)
        v
-  +----------------------+         +---------------------------+
-  | Single-Run-Path      |         | Chat-Mode-Path (--chat)   |
-  | (default)            |         |                           |
-  +----------+-----------+         +-------------+-------------+
-             |                                   |
-             v                                   v
-  Picker (mod-4 timestamp)            Picker x4 (timestamp + offset)
-  + Variation-Guard                   + Variation-Guard pro Archetype
-             |                                   |
-             v                                   v
-  Archetype-Prompt-Template           Round 1: 4 parallele Calls (5 Provokationen je)
-  (one of four)                       Round 2: 4 parallele Calls (counter/extend, 3 je)
-             |                        Round 3: codex:codex-rescue (Distillation auf 20)
-             v                                   v
-  10 Provokationen                    20 Final-Ideen
-  + 1 Next-Experiment                 + Top-3 Cross-Pollination
-             |                        + Next-Experiment
-             v                                   |
-  Output-File:                                   v
+  +---------------------+   +-------------------------+   +----------------+
+  | Single-Run-Path     |   | Chat-Mode-Path (--chat) |   | Lab (--lab)    |
+  | (default)           |   |                         |   | standalone     |
+  +---------+-----------+   +------------+------------+   +-------+--------+
+            |                            |                        |
+            v                            v                        v
+  Picker (mod-4 timestamp)    Picker x4 (timestamp + offset)    webbrowser.open()
+  + Variation-Guard           + Variation-Guard pro Archetype     |
+            |                            |                        v
+            v                            v                lab/index.html
+  Archetype-Prompt-Template   Round 1: 4 parallele Calls    (browser-only)
+  (one of four)               Round 2: 4 parallele Calls
+            |                 Round 3: codex:codex-rescue
+            v                            v
+  10 Provokationen            20 Final-Ideen
+  + 1 Next-Experiment         + Top-3 Cross-Pollination
+            |                 + Next-Experiment
+            v                            |
+  Output-File:                           v
   .agent-memory/lab/crazy-professor/   Output-File:
   YYYY-MM-DD-HHMM-<topic>.md           .agent-memory/lab/crazy-professor/chat/
-             |                        YYYY-MM-DD-HHMM-<topic>.md
-             v                                   |
+            |                          YYYY-MM-DD-HHMM-<topic>.md
+            v                                   |
   +-----------------------------+----------------+
                                 |
                                 v
@@ -46,55 +46,50 @@ User Prompt / "crazy professor" / /crazy <topic>
 
 ### Slash-Command
 - **Datei(en):** `commands/crazy.md`
-- **Aufgabe:** Trigger via `/crazy <topic> [--chat]`. Parst `$ARGUMENTS`, weicht bei leerem Topic auf den letzten Konversations-Kontext aus. Dispatcht zwischen Single-Run und Chat-Mode.
+- **Aufgabe:** Trigger via `/crazy <topic> [--chat] [--lab]`. Parst `$ARGUMENTS`, dispatcht zwischen Single-Run, Chat-Mode und Lab.
 - **Abhaengigkeiten:** `skills/crazy-professor/SKILL.md`
 
 ### SKILL.md
 - **Datei(en):** `skills/crazy-professor/SKILL.md`
-- **Aufgabe:** Operative Vorschrift fuer Claude. Definiert Schritte 1-7 fuer Single-Run und C1-C8 fuer Chat-Mode. Enthaelt Hard-Rules, Museum-Clause, Field-Test-Rule.
+- **Aufgabe:** Operative Vorschrift fuer Claude. Definiert Schritte 1-5 fuer Single-Run, C1-C6 fuer Chat-Mode, L1 fuer Lab. Verweist auf Hard-Rules (Museum-Clause, Field-Test-Rule).
 - **Abhaengigkeiten:** prompt-templates/, references/, resources/
 
 ### Prompt-Templates
 - **Datei(en):** `skills/crazy-professor/prompt-templates/{first-principles-jester,labyrinth-librarian,systems-alchemist,radagast-brown}.md` + Chat-Mode-Wrapper (`chat-round-1-wrapper.md`, `chat-round-2-wrapper.md`, `chat-curator.md`)
-- **Aufgabe:** Die "System-Prompt-Kern"-Bloecke pro Archetype. Definieren Stimme, Pflicht- und Verbots-Vokabular.
+- **Aufgabe:** Die "System-Prompt-Kern"-Bloecke pro Archetype. Definieren Stimme, Pflicht- und Verbots-Vokabular. Radagast-Template enthaelt zusaetzlich die "Activation Amendments" mit den 4 binding conditions.
 - **Abhaengigkeiten:** —
 
 ### References (Load-on-Demand)
 - **Datei(en):** `skills/crazy-professor/references/`
-- **Aufgabe:** Detail-Dokumente, die Claude erst lesen muss, wenn der Kontext es verlangt: Radagast-Aktivierung, Review-Rubric, Roadmap, Chat-Mode-Flow, Usage-Patterns.
+- **Aufgabe:** 3 Detail-Dokumente: `operating-instructions.md` (Steps 1-5, C1-C6, L1), `hard-rules.md` (Hard Rules + Museum + Review-Rubric), `roadmap.md` (Out-of-Scope-Design-Intent + Rolled-Back-Section).
 - **Abhaengigkeiten:** —
 
 ### Resources
 - **Datei(en):** `skills/crazy-professor/resources/`
-- **Aufgabe:** Statische Daten: `provocation-words.txt` (Pool), `retired-words.txt` (Schwarze Liste), `po-operators.md` (4 Operatoren seit v0.11.0), `output-template.md`, `chat-output-template.md` (mit Compact-Mode-Body-Beispiel seit v0.11.0), `archetype-keywords.txt`, `field-notes-init.md`, `field-notes-schema.md`, `stop-words.txt` (seit v0.11.0, fuer Cross-Pollination-Linter Token-Overlap-Filter).
+- **Aufgabe:** Statische Daten: `provocation-words.txt` (Pool), `retired-words.txt` (Schwarze Liste), `po-operators.md` (4 Operatoren), `output-template.md`, `chat-output-template.md`, `field-notes-schema.md`.
 - **Abhaengigkeiten:** —
 
-### Linter-Skripte (4 seit v0.11.0)
-- **Datei(en):** `skills/crazy-professor/scripts/lint_voice.py`, `lint_word_pool.py`, `lint_cross_pollination.py` (4. Linter, Phase 6), und der Validator `validate_output.py`.
-- **Aufgabe:** Pre-Write-Quality-Gates. `lint_voice` prueft Lexicon-Gate pro Archetype. `lint_word_pool` prueft Wort-Pool-Integritaet. `lint_cross_pollination` prueft R2-Items in Chat-Mode-Output auf Marker-Existenz, Ref-Aufloesung und Token-Overlap mit Ref (warn-only, exit 0 immer). Aktiviert nur via `--strict-cross-pollination`. `validate_output` prueft Format-Drift und seit v0.11.0 die Compact-Mode-Reihenfolge.
-- **Abhaengigkeiten:** Stdlib-only. `lint_cross_pollination` liest `resources/stop-words.txt`.
+### Picker-Skript
+- **Datei(en):** `skills/crazy-professor/scripts/picker.py`
+- **Aufgabe:** Deterministische stochastische Auswahl mit Variation-Guard. Liest `field-notes.md` (letzte 10 Rows), wendet Anti-Streak-Logik an, schreibt JSON auf stdout. Modi: `--mode single` (default), `--mode chat`. Stdlib-only.
+- **Abhaengigkeiten:** Python 3 (optional — Fallback-Prosa-Mechanik im Modul-Docstring fuer python-lose Umgebungen).
 
-### Browser-Playground (seit v0.12.0)
-- **Datei(en):** `skills/crazy-professor/scripts/build_playground.py` (Build-Skript) + `skills/crazy-professor/playground/index.html` (gebautes Output) + Cockpit-Layout (CSS_BLOCK + JS_BLOCK module-level constants).
-- **Aufgabe:** Browser-Playground als visuelle Schicht fuer den Picker. Build-Skript liest Resources zur Build-Zeit, generiert single-file HTML mit inlined Daten (kein HTTP-Server, `file://`-tauglich). Browser ist Pure-Picker + Prompt-Builder + Copy-Helper -- kein LLM-Call, kein File-System-Access. User kopiert generierten Prompt zurueck ins Terminal als normaler `/crazy <topic> --force-archetype X --force-word Y --force-operator Z`-Aufruf.
-- **Abhaengigkeiten:** Stdlib-only Python fuer den Build. HTML5 + vanilla JavaScript (Clipboard API) fuer den Browser-Teil. Picker-Force-Flags (Phase 7) machen den Browser-Output validierbar gegen den CLI-Picker.
-
-### Telegram Solution Dialogue Scaffold (Phase-8-Draft, seit 2026-04-30)
-- **Datei(en):** `skills/crazy-professor/scripts/telegram_dialogue.py` + `docs/specs/2026-04-30-phase-8-telegram-solution-dialogue.md`
-- **Aufgabe:** Netzwerkfreier Dialogvertrag fuer einen spaeteren Telegram-Bot. Das Skript erzeugt Transcript-Seeds und JSON-Prompt-Packets fuer drei Rollen: Professor (destabilisiert), Claude (synthetisiert), Gate (entscheidet `ACCEPT | CONTINUE | FORCE_SMALL_EXPERIMENT`). Der Loop ist auf `max_rounds` begrenzt und schreibt unter `.agent-memory/lab/crazy-professor/telegram-dialogue/`.
-- **Abhaengigkeiten:** Stdlib-only Python. Keine Telegram-API, kein Bot-Token, kein Webhook. Ein spaeterer Telegram-Adapter darf nur Transport, Allowlist, Rate-Limit und Transcript-Persistenz uebernehmen; Rollenlogik bleibt im Dialogue-Contract.
+### Lab (statisches HTML)
+- **Datei(en):** `skills/crazy-professor/lab/index.html`
+- **Aufgabe:** Browser-Triage-Surface. User paste'd einen vorhandenen crazy-professor-Output, scored Ideen nach Wert/Umsetzbarkeit/Systemfit, kopiert eine Experiment-Card raus. Pure-Static, `file://`-tauglich, kein LLM-Call, kein File-Write von Browser-JavaScript.
+- **Abhaengigkeiten:** HTML5 + vanilla JavaScript (Clipboard API).
 
 ### Codex-Subagent (extern)
 - **Datei(en):** Plugin `codex` mit `codex:codex-rescue` Skill
 - **Aufgabe:** Round-3-Distillation in Chat-Mode. Bekommt bis zu 32 Provokationen, gibt 20 Final-Ideen + Top-3 Cross-Pollination + Next-Experiment zurueck.
-- **Abhaengigkeiten:** Codex CLI installiert + lauffaehig
+- **Abhaengigkeiten:** Codex CLI installiert + lauffaehig. Bei Ausfall: Claude-Fallback im selben Prompt.
 
 ## Datenfluss
 
 1. User triggert `/crazy <topic>` oder Trigger-Phrase ("crazy professor", "verrueckter professor", ...).
-2. Slash-Command parst `$ARGUMENTS`, dispatched. Bei leerem Topic in Single-Run: Letzten Konversations-Kontext nehmen.
-3. SKILL.md fuehrt Picker-Phase aus (Archetype mod-4 aus UTC-Minute, Wort aus pool, PO-Operator mod-3 aus UTC-Sekunde).
-4. Variation-Guard liest letzte 10 Rows von `field-notes.md`, blockiert/re-rolled bei Archetype-Streak (≥3) oder Wort-Wiederholung.
+2. Slash-Command parst `$ARGUMENTS`, dispatched. Bei leerem Topic in Single-Run: Letzten Konversations-Kontext nehmen. Bei `--chat` ohne Topic: Reject.
+3. SKILL.md ruft Picker-Skript auf (Archetype mod-4 aus UTC-Minute, Operator mod-4 aus UTC-Sekunde, Wort microsecond-seeded aus aktivem Pool minus retired).
+4. Variation-Guard im Picker-Skript liest letzte 10 Rows von `field-notes.md`, blockiert/re-rolled bei Archetype-Streak (≥3) oder Wort-Wiederholung.
 5. Archetype-Prompt-Template wird geladen, LLM-Call erzeugt 10 Provokationen mit Adoption-Cost-Tag + Anchor.
 6. Output-Datei in `.agent-memory/lab/crazy-professor/YYYY-MM-DD-HHMM-<topic-slug>.md`.
 7. Field-Notes-Row in `field-notes.md` angehaengt mit Timestamp, Archetype, Wort, Operator, Topic-Slug, Output-Pfad, `re-rolled`-Wert.
@@ -104,6 +99,10 @@ Chat-Mode-Variante:
 - Schritt 5 ersetzt durch Round-1 (4 parallele Calls, 5 Provokationen je), Round-2 (4 parallele Cross-Pollination-Calls), Round-3 (Codex-Distiller-Call).
 - Output-Datei in `.agent-memory/lab/crazy-professor/chat/YYYY-MM-DD-HHMM-<topic-slug>.md` mit `mode: chat`-Frontmatter.
 - Field-Notes-Row markiert `mode: chat`, `archetype: all-4`, `word: multi`.
+
+Lab-Variante:
+- Schritt 1+2 reduziert auf `webbrowser.open(...)` mit dem statischen HTML-Pfad.
+- Keine Schritte 3-7. Kein LLM-Call, kein File-Write, keine Field-Notes-Row.
 
 ## Persistenz
 
@@ -115,14 +114,12 @@ Chat-Mode-Variante:
 | Provocation-Words-Pool | TXT | `skills/crazy-professor/resources/provocation-words.txt` | Aktive Wort-Liste, eine Zeile je Eintrag |
 | Retired-Words | TXT | `skills/crazy-professor/resources/retired-words.txt` | Schwarze Liste fuer 3-mal-monoton-geflaggt-Worte |
 
-Persistenz aktuell ohne strukturiertes Schema und ohne Telemetrie. Phase 2 fuehrt ein field-notes-Schema mit Init-Header-Helper ein, Phase 4 fuehrt ein JSONL/SQLite-Telemetrie-Log parallel zur Markdown-Tabelle ein.
+Persistenz ist ohne Telemetrie-Layer (in v0.13.0 zurueckgebaut). Field-Notes-Markdown-Tabelle ist die einzige maschinenlesbare Run-Persistenz.
 
 ## Sicherheit
 
-- **Persona-Drift-Risiko**: Persona-Prompting kann auf wissensschweren Tasks bis zu 30pp Genauigkeit kosten (Search Engine Journal 2024). Hard Rule "Output is never advice" + Warning-Banner im Output-Template adressieren das. Phase-3-Linter erzwingt Pflicht/Verbots-Vokabular pro Archetype und schliesst Voice-Drift weiter ab.
+- **Persona-Drift-Risiko**: Persona-Prompting kann auf wissensschweren Tasks bis zu 30pp Genauigkeit kosten (Search Engine Journal 2024). Hard Rule "Output is never advice" + Warning-Banner im Output-Template adressieren das. Verbotenes Vokabular pro Archetype lebt als Prosa in den Prompt-Templates (Voice-Linter wurde in v0.13.0 zurueckgebaut, ist Soll-Vertrag im Prompt).
 - **Adoption-Risiko**: Museum-Clause limitiert Adoption-ohne-Evidenz: nach 10 Runs ohne Keeper zieht der Skill sich selbst zurueck.
-- **Telegram-Bridge** (Phase 8): Security-Audit als Vorbedingung. Auth/Input-Validation-Surface, externer Channel.
-- **Telegram Solution Dialogue** (Phase-8-Draft): Live-Transport bleibt blockiert, bis Token-Handling, `chat_id`-Allowlist, Webhook/Polling-Schutz, Rate-Limit, `/stop`-Interrupt und Transcript-Persistenz geprueft sind.
 - Keine Secrets im Repo. Keine Netzwerk-Calls aus dem Skill ausser ueber Codex-Subagent (Round-3) und das Standard-Claude-Code-LLM-API.
 
 ## Deployment
@@ -130,4 +127,8 @@ Persistenz aktuell ohne strukturiertes Schema und ohne Telemetrie. Phase 2 fuehr
 - **Lokal nur**: Plugin in `~/.claude/plugins/` (oder `~/.claude/skills/<name>/` fuer Standalone-Form).
 - **Marketplace**: aktuell nicht im offiziellen Anthropic-Marketplace. Local-Install via `claude plugin install crazy-professor --scope user`. README beschreibt Marketplace-Variante mit `claude plugin marketplace add willneverusegit/crazy-professor`.
 - **Update**: `claude plugin update crazy-professor`. Marketplace-Cache wird neu gezogen — Quelle muss als Tag/Release veroeffentlicht sein.
-- **Trigger**: Slash-Command `/crazy <topic> [--chat]` oder Trigger-Phrasen aus SKILL.md (deutsch + englisch).
+- **Trigger**: Slash-Command `/crazy <topic> [--chat]` / `/crazy --lab` oder Trigger-Phrasen aus SKILL.md (deutsch + englisch).
+
+## Was in v0.13.0 entfernt wurde
+
+Phasen 4-8 (Telemetrie, Patch-Suggester, Run-Planner, Voice/Word-Pool/Cross-Pollination-Linter, Eval-Suite, Telegram-Dialogue, Browser-Playground, Ideation-Lab-v2-Design) wurden am 2026-05-02 zurueckgebaut. Detail in `docs/CHANGELOG.md` v0.13.0 Eintrag.

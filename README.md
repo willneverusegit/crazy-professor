@@ -36,8 +36,7 @@ Marketplace installs are cached under Claude Code's plugin cache. Source-repo ch
 ```text
 /crazy <topic>
 /crazy <topic> --chat
-/crazy <topic> --dry-run
-/crazy --from-session
+/crazy --lab
 ```
 
 Runs the divergence generator on `<topic>`. Add `--chat` when the topic needs all four voices and a curated 20-idea output.
@@ -48,8 +47,7 @@ Runs the divergence generator on `<topic>`. Add `--chat` when the topic needs al
 - **Single-run without topic** — uses the most recent concrete task, plan, or problem from the current conversation as topic. If the conversation context is empty, meta, or too vague (e.g. "tell me a story", "how does this skill work"), the skill asks one clarifying question and stops instead of fabricating a topic.
 - **Chat-mode with topic** — runs normally.
 - **Chat-mode without topic** — explicitly rejected. Chat-mode costs ~10 LLM calls and 2-4 min wall-clock; the user must name the topic deliberately. The skill returns: `Chat-mode requires an explicit topic. Run /crazy <topic> --chat or use single-run for ambient topics.`
-- **`--from-session`** — skill reads `<cwd>/.agent-memory/session-summary.md` (and the Desktop session-summary as fallback), extracts 3 topic candidates from the "Naechste Schritte" / "Open Items" sections, and asks the user which to use.
-- **`--dry-run`** (single-run only) — skill runs the run-planner + picker but stops before generation. Prints the chosen archetype, word, operator, and the variation-guard state. Useful for debugging the run-planner logic without producing an output file.
+- **`--lab`** — opens the static Ideation Lab at `skills/crazy-professor/lab/index.html`. Standalone only; paste an existing professor output into the browser UI for triage and one copyable experiment card.
 
 ### Trigger phrases
 
@@ -62,4 +60,11 @@ Runs the divergence generator on `<topic>`. Add `--chat` when the topic needs al
 
 ## Status
 
-Local-only. Default single-run and Chat-Mode are active. Telegram bridge explicitly out of scope.
+v0.13.0 active (released 2026-05-02). Default single-run, Chat-Mode and the
+static Lab (`/crazy --lab`) are the only user-facing surfaces. Phase 4-8 was
+rolled back on 2026-05-02 (telemetry, voice/word-pool/cross-pollination
+linters, eval-suite, run-planner, patch-suggester, browser playground,
+telegram-dialogue scaffold, ideation-lab v2 design — all removed). See
+`docs/CHANGELOG.md` v0.13.0 entry for the rationale and full file list.
+
+Local-only.

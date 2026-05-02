@@ -11,8 +11,7 @@ Pfad: `.agent-memory/lab/crazy-professor/chat/YYYY-MM-DD-HHMM-<topic-slug>.md`
 ---
 skill: crazy-professor
 mode: chat
-compact: <true | false>
-version: 0.12.0
+version: 0.13.0
 timestamp: <ISO-8601 UTC>
 topic: "<user input, one line, unmodified>"
 archetypes: [first-principles-jester, labyrinth-librarian, systems-alchemist, radagast-brown]
@@ -200,85 +199,3 @@ Das ist KEIN Produkt-Output, sondern ein Rohmaterial-Dump fuer den
 User, damit die Arbeit nicht verloren ist. Das Flag
 `distiller-fallback-used` wird NICHT gesetzt (weil auch kein Fallback
 lief) — stattdessen das neue Flag `chat-mode-incomplete` eingefuehrt.
-
----
-
-## Compact-Mode Body (when `compact: true`)
-
-When `compact: true` is set in the frontmatter, the body uses a different
-order: Round 3 + Top-3 + Next-Experiment + Self-Flag come first, and
-Round 1 + Round 2 are wrapped in a single `<details>`-block at the bottom
-as an audit-trail. The frontmatter is unchanged; only the body order
-flips.
-
-```markdown
-# Chat: <topic>
-
-**Mode:** chat | **Compact:** true | **Distiller:** <codex|claude-fallback>
-
-> DIVERGENCE WARNING: This output is provocation material, not advice.
-> ... (same banner as normal mode)
-
-## Round 3 — Codex Distillation (Final 20)
-
-### Jester-5
-1. ...
-5. ...
-
-### Librarian-5
-### Alchemist-5
-### Radagast-5
-
-## Top-3 Cross-Pollination Hits
-1. ...
-2. ...
-3. ...
-
-## Next Experiment (one, only)
-...
-
-## Self-Flag (for field-notes.md)
-- [ ] kept
-- [ ] round2-was-degraded
-- [ ] distiller-fallback-used
-- [ ] voice-cross-drift
-
----
-
-<details>
-<summary>Audit-Trail — Round 1 + Round 2 (click to expand)</summary>
-
-## Round 1 — Parallel Voices (5 Provocations per Archetype)
-
-### Jester (word: <w>, operator: <op>)
-1. ...
-5. ...
-
-### Librarian ...
-### Alchemist ...
-### Radagast ...
-
-## Round 2 — Cross-Pollination (2-3 per Archetype, counter/extend)
-
-### Jester — Runde 2
-- counter: <archetype> #<n> — <provokation> — anchor: <link>
-...
-
-### Librarian — Runde 2
-### Alchemist — Runde 2
-### Radagast — Runde 2
-
-</details>
-```
-
-### Notes on compact mode
-
-- **`<details>` tag is HTML in Markdown** and renders as a collapsible
-  block in GitHub, Obsidian, and VS Code. Plain-text rendering still
-  shows the content inline.
-- **R2-degraded edge case:** if `round2_status: degraded`, the `<details>`
-  block contains only Round 1 plus a "Round 2 — skipped (degraded)" line
-  in place of the R2 sub-headings. Mirrors normal-mode behavior.
-- **`--strict-cross-pollination` markers** (`[low-substance: <reason>]`)
-  appear inside the `<details>` block in compact mode. Codex-distillation
-  in Round 3 still sees the markers as part of its R2 input.

@@ -4,6 +4,28 @@ Neueste Eintraege oben. Format: `## [vX.Y.Z] [YYYY-MM-DD] Kurztitel` für Versio
 
 ---
 
+## [v0.13.0] [2026-05-02] Rückbau auf Single-Run + Chat-Mode + Lab
+
+**Versions-Bump-Begründung (per VERSIONING.md):** MINOR-Bump weil die User-Flag-Surface schrumpft (`--playground`, `--from-session`, `--dry-run`, `--compact`, `--strict-cross-pollination` entfernt) und ~3000 Zeilen Tooling stillgelegt werden. Skill-Kern (4 Archetypen, Picker, Chat-Mode-Distillation) bleibt unverändert.
+
+**Lerngeschichte:** Stand 2026-05-02 hatte der Skill 18 Runs total in field-notes, 0 telemetry records, 0 patch suggestions, 0 telegram dialogues. Die Phasen 4-8 (Telemetrie, Patch-Suggester, Run-Planner, Cross-Pollination-Linter, Voice-Linter, Word-Pool-Linter, Eval-Suite, Telegram-Dialogue, Playground, Lab v2) wurden gebaut, ohne dass die Phasen 1-3 jemals einen Datenstrom produziert haben, gegen den die späteren Phasen sich rechtfertigen konnten. Master-Plan-Drift mit geplanter Phasen-Erfüllung als Selbstzweck. Rückbau ist die Konsequenz: weniger Maschinerie, sodass die Frage "wird der Skill wirklich genutzt" überhaupt sauber beantwortbar wird.
+
+- 10 Python-Skripte + 1 Shell-Wrapper gelöscht (validate_output, lint_voice, lint_word_pool, lint_cross_pollination, eval_suite, telemetry, patch_suggester, run_planner, telegram_dialogue, build_playground, run_linters.sh).
+- `playground/`-Ordner gelöscht.
+- 4 Reference-Files gelöscht (chat-mode-flow stub, radagast-activation, review-rubric, usage-patterns).
+- 3 Resources gelöscht (archetype-keywords, stop-words, field-notes-init).
+- 4 Lexicon-Gate-YAML-Blöcke aus den Archetype-Templates entfernt.
+- 5 User-Flags entfernt (`--playground`, `--from-session`, `--dry-run`, `--compact`, `--strict-cross-pollination`).
+- `picker.py` schlanker (Force-Flags + `--wishful-share` raus, von ~314 auf ~261 LOC).
+- `SKILL.md` von 273 auf 172 Zeilen.
+- `operating-instructions.md` von 494 auf 148 Zeilen.
+- `hard-rules.md` von 106 auf 105 Zeilen (review-rubric integriert).
+- `commands/crazy.md` von 30 auf 20 Zeilen.
+- 10 Plan-/Spec-Files gelöscht (Phase 5/6/7 Designs, Phase-8-Spec, Ideation-Lab-v2 Spec+Plan, 2 eval-baselines, USAGE-PATTERNS-Doppel, linters.md).
+- radagast-brown.md "Activation Amendments"-Section bleibt unverändert (binding conditions als Prosa-Bullets, ersetzt das gelöschte references/radagast-activation.md).
+
+---
+
 ## [2026-04-30] Phase 8 Draft -- Telegram Solution Dialogue Scaffold
 
 - **Phase-8-Vertrag spezifiziert**: `docs/specs/2026-04-30-phase-8-telegram-solution-dialogue.md` beschreibt Professor-vs-Claude-vs-Gate-Loop, Stop-Bedingungen, Telegram-Adapter-Grenze und Security-Gate.

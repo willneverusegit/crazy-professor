@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>crazy-professor ideation lab</title>
+<style>
+:root {
+  --bg: #0b0c0e;
+  --panel: #15171a;
+  --panel-2: #1d2024;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --text: #e3e5e8;
+  --muted: #9ba1a8;
+  --dim: #697079;
+  --blue: #7fb3d5;
+  --green: #91b982;
+  --amber: #d7a75d;
+  --red: #c97474;
+  --button: #252931;
+  --button-hover: #303640;
+  --button-primary: #7fb3d5;
+  --button-primary-text: #071017;
+  --focus: #b9d7ef;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button, select, input, textarea {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+button {
+  min-height: 36px;
+  padding: 8px 12px;
+  background: var(--button);
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:hover { background: var(--button-hover); }
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+button.primary {
+  background: var(--button-primary);
+  color: var(--button-primary-text);
+  border-color: transparent;
+  font-weight: 700;
+}
+
+button.ghost {
+  background: transparent;
+}
+
+.app {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 18px;
+}
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.version {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 180px 150px auto auto;
+  gap: 10px;
+  margin: 18px 0;
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label,
+.label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+input, select, textarea {
+  width: 100%;
+  background: var(--panel);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+input, select {
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+textarea {
+  min-height: 180px;
+  padding: 12px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-weight: 750;
+}
+
+.panel-body {
+  padding: 12px;
+}
+
+.status {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.status.ok { color: var(--green); }
+.status.warn { color: var(--amber); }
+.status.bad { color: var(--red); }
+
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.idea {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 12px;
+}
+
+.idea.selected {
+  border-color: rgba(127, 179, 213, 0.7);
+  box-shadow: inset 3px 0 0 var(--blue);
+}
+
+.idea-text {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pill {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.cost-low { color: var(--green); }
+.cost-medium { color: var(--amber); }
+.cost-high,
+.cost-system-break { color: var(--red); }
+
+.scores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.score-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.score-field select,
+.side-control select {
+  min-height: 34px;
+  padding: 6px 8px;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.side-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.risk-input {
+  min-height: 34px;
+}
+
+.small-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.empty {
+  padding: 28px 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.experiment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.experiment-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.experiment-field textarea {
+  min-height: 96px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.selected-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+  margin-bottom: 12px;
+}
+
+.summary-text {
+  overflow-wrap: anywhere;
+}
+
+.copy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 920px) {
+  .toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .app { padding: 12px; }
+  .topbar { flex-direction: column; gap: 4px; }
+  .toolbar { grid-template-columns: 1fr; }
+  .idea { grid-template-columns: 1fr; }
+  .experiment-grid { grid-template-columns: 1fr; }
+  .small-actions { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="topbar">
+    <div class="brand">crazy-professor Ideation Lab</div>
+    <div class="version">slice 1</div>
+  </header>
+
+  <section class="toolbar" aria-label="run context">
+    <div class="field">
+      <label for="topic">Topic</label>
+      <input id="topic" type="text" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="intent">Intent</label>
+      <select id="intent">
+        <option value="unknown">unknown</option>
+        <option value="break-architecture">break-architecture</option>
+        <option value="product-direction">product-direction</option>
+        <option value="workflow-change">workflow-change</option>
+        <option value="ui-reframe">ui-reframe</option>
+        <option value="governance-change">governance-change</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="mode">Mode</label>
+      <select id="mode">
+        <option value="single">single</option>
+        <option value="chat-compact">chat-compact</option>
+      </select>
+    </div>
+    <button id="parse" class="primary" type="button">Parse</button>
+    <button id="reset" class="ghost" type="button">Reset</button>
+  </section>
+
+  <section class="workspace">
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Raw Output</div>
+        <div id="parse-status" class="status">idle</div>
+      </div>
+      <div class="panel-body">
+        <textarea id="raw-output" spellcheck="false"></textarea>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Triage Board</div>
+        <div id="recommendation-status" class="status">no ideas</div>
+      </div>
+      <div class="panel-body">
+        <div id="board" class="board">
+          <div class="empty">No ideas parsed.</div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="panel" style="margin-top:16px">
+    <div class="panel-head">
+      <div class="panel-title">Selected Experiment</div>
+      <div id="copy-status" class="status">not copied</div>
+    </div>
+    <div class="panel-body">
+      <div id="selected-summary" class="selected-summary">
+        <div class="status warn">No eligible idea selected.</div>
+      </div>
+      <div class="experiment-grid">
+        <div class="experiment-field">
+          <label for="hypothesis">Hypothesis</label>
+          <textarea id="hypothesis"></textarea>
+        </div>
+        <div class="experiment-field">
+          <label for="test">Test</label>
+          <textarea id="test"></textarea>
+        </div>
+        <div class="experiment-field">
+          <label for="success">Success Criterion</label>
+          <textarea id="success"></textarea>
+        </div>
+        <div class="experiment-field">
+          <label for="rollback">Rollback</label>
+          <textarea id="rollback"></textarea>
+        </div>
+      </div>
+      <div class="copy-row">
+        <div class="status">Markdown card</div>
+        <button id="copy" class="primary" type="button">Copy Markdown</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const COST_RANK = {
+  "low": 0,
+  "medium": 1,
+  "high": 2,
+  "system-break": 3
+};
+
+const state = {
+  ideas: [],
+  selectedIndex: null,
+  manualIndex: null
+};
+
+const els = {
+  topic: document.getElementById("topic"),
+  intent: document.getElementById("intent"),
+  mode: document.getElementById("mode"),
+  parse: document.getElementById("parse"),
+  reset: document.getElementById("reset"),
+  raw: document.getElementById("raw-output"),
+  board: document.getElementById("board"),
+  parseStatus: document.getElementById("parse-status"),
+  recStatus: document.getElementById("recommendation-status"),
+  copyStatus: document.getElementById("copy-status"),
+  summary: document.getElementById("selected-summary"),
+  hypothesis: document.getElementById("hypothesis"),
+  test: document.getElementById("test"),
+  success: document.getElementById("success"),
+  rollback: document.getElementById("rollback"),
+  copy: document.getElementById("copy")
+};
+
+function stripListMarker(line) {
+  return line.replace(/^\s*(?:[-*]|\d+[.)])\s+/, "").trim();
+}
+
+function parseLine(line) {
+  const clean = stripListMarker(line);
+  const match = clean.match(/^(.*?)\s+--\s+\[cost:\s*(low|medium|high|system-break)\s*\]\s+--\s+anchor:\s*(.+)$/i);
+  if (!match) return null;
+  return {
+    text: match[1].trim(),
+    cost: match[2].toLowerCase(),
+    anchor: match[3].trim(),
+    wert: 0,
+    umsetzbarkeit: 0,
+    systemfit: 0,
+    risk: "",
+    verdict: "backlog"
+  };
+}
+
+function parseOutput(raw) {
+  return raw
+    .split(/\r?\n/)
+    .map(parseLine)
+    .filter(Boolean);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function scoreSelect(index, key, value) {
+  return `
+    <div class="score-field">
+      <label for="${key}-${index}">${key}</label>
+      <select id="${key}-${index}" data-index="${index}" data-key="${key}">
+        ${[0, 1, 2].map(n => `<option value="${n}"${Number(value) === n ? " selected" : ""}>${n}</option>`).join("")}
+      </select>
+    </div>
+  `;
+}
+
+function renderBoard() {
+  if (state.ideas.length === 0) {
+    els.board.innerHTML = '<div class="empty">No ideas parsed.</div>';
+    els.recStatus.textContent = "no ideas";
+    els.recStatus.className = "status";
+    renderExperiment();
+    return;
+  }
+
+  els.board.innerHTML = state.ideas.map((idea, index) => {
+    const selectedClass = index === state.selectedIndex ? " selected" : "";
+    return `
+      <article class="idea${selectedClass}">
+        <div>
+          <div class="idea-text">${escapeHtml(idea.text)}</div>
+          <div class="meta">
+            <span class="pill cost-${idea.cost}">${escapeHtml(idea.cost)}</span>
+            <span class="pill">${escapeHtml(idea.anchor)}</span>
+          </div>
+        </div>
+        <div class="side">
+          <div class="scores">
+            ${scoreSelect(index, "wert", idea.wert)}
+            ${scoreSelect(index, "umsetzbarkeit", idea.umsetzbarkeit)}
+            ${scoreSelect(index, "systemfit", idea.systemfit)}
+          </div>
+          <div class="side-control">
+            <label for="risk-${index}">risk</label>
+            <input id="risk-${index}" class="risk-input" type="text" value="${escapeHtml(idea.risk)}" data-index="${index}" data-key="risk">
+          </div>
+          <div class="side-control">
+            <label for="verdict-${index}">verdict</label>
+            <select id="verdict-${index}" data-index="${index}" data-key="verdict">
+              ${["experiment", "conditional", "backlog", "retire"].map(v => `<option value="${v}"${idea.verdict === v ? " selected" : ""}>${v}</option>`).join("")}
+            </select>
+          </div>
+          <div class="small-actions">
+            <button type="button" data-select="${index}">Select</button>
+            <button type="button" data-clear="${index}">Clear</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function eligible(idea) {
+  return Number(idea.wert) >= 1 &&
+    Number(idea.umsetzbarkeit) >= 1 &&
+    Number(idea.systemfit) >= 1 &&
+    idea.verdict !== "retire";
+}
+
+function recommendIndex() {
+  if (state.manualIndex !== null && state.ideas[state.manualIndex]) {
+    return state.manualIndex;
+  }
+
+  let best = null;
+  for (let i = 0; i < state.ideas.length; i += 1) {
+    const idea = state.ideas[i];
+    if (!eligible(idea)) continue;
+    const candidate = {
+      index: i,
+      total: Number(idea.wert) + Number(idea.umsetzbarkeit) + Number(idea.systemfit),
+      cost: COST_RANK[idea.cost] ?? 9,
+      anchor: idea.anchor ? 1 : 0
+    };
+    if (!best ||
+        candidate.total > best.total ||
+        (candidate.total === best.total && candidate.cost < best.cost) ||
+        (candidate.total === best.total && candidate.cost === best.cost && candidate.anchor > best.anchor)) {
+      best = candidate;
+    }
+  }
+  return best ? best.index : null;
+}
+
+function updateRecommendation() {
+  state.selectedIndex = recommendIndex();
+  if (state.selectedIndex === null) {
+    els.recStatus.textContent = "no eligible idea";
+    els.recStatus.className = "status warn";
+  } else if (state.manualIndex !== null) {
+    els.recStatus.textContent = `manual: ${state.selectedIndex + 1}`;
+    els.recStatus.className = "status ok";
+  } else {
+    els.recStatus.textContent = `recommended: ${state.selectedIndex + 1}`;
+    els.recStatus.className = "status ok";
+  }
+  renderBoard();
+  renderExperiment();
+}
+
+function templateExperiment(idea) {
+  const topic = els.topic.value.trim() || "the current topic";
+  return {
+    hypothesis: `If we test this provocation for ${topic}, then the next useful path should become easier to see because the current frame is forced into a smaller observable change.`,
+    test: `Run one 60-120 minute test anchored to ${idea.anchor || "the current project"} and capture the smallest observable result.`,
+    success: "A concrete artefact, decision, or workflow change exists and is worth one follow-up step.",
+    rollback: "Stop after the timebox, keep the note, and do not change the runtime system unless the result is clearly useful."
+  };
+}
+
+function renderExperiment() {
+  const idea = state.selectedIndex === null ? null : state.ideas[state.selectedIndex];
+  if (!idea) {
+    els.summary.innerHTML = '<div class="status warn">No eligible idea selected.</div>';
+    if (!els.hypothesis.dataset.userEdited) els.hypothesis.value = "";
+    if (!els.test.dataset.userEdited) els.test.value = "";
+    if (!els.success.dataset.userEdited) els.success.value = "";
+    if (!els.rollback.dataset.userEdited) els.rollback.value = "";
+    return;
+  }
+
+  els.summary.innerHTML = `
+    <div class="summary-text">${escapeHtml(idea.text)}</div>
+    <div class="meta">
+      <span class="pill cost-${idea.cost}">${escapeHtml(idea.cost)}</span>
+      <span class="pill">${escapeHtml(idea.anchor)}</span>
+      <span class="pill">W${idea.wert} U${idea.umsetzbarkeit} S${idea.systemfit}</span>
+      <span class="pill">${escapeHtml(idea.verdict)}</span>
+    </div>
+  `;
+
+  const template = templateExperiment(idea);
+  if (!els.hypothesis.dataset.userEdited) els.hypothesis.value = template.hypothesis;
+  if (!els.test.dataset.userEdited) els.test.value = template.test;
+  if (!els.success.dataset.userEdited) els.success.value = template.success;
+  if (!els.rollback.dataset.userEdited) els.rollback.value = template.rollback;
+}
+
+function resetExperimentEdits() {
+  [els.hypothesis, els.test, els.success, els.rollback].forEach(el => {
+    delete el.dataset.userEdited;
+  });
+}
+
+function markdownCard() {
+  const idea = state.selectedIndex === null ? null : state.ideas[state.selectedIndex];
+  if (!idea) return "";
+  const topic = els.topic.value.trim();
+  const intent = els.intent.value;
+  return [
+    "## Crazy Professor Experiment",
+    "",
+    `**Topic:** ${topic}`,
+    `**Intent:** ${intent}`,
+    `**Selected idea:** ${idea.text}`,
+    `**Anchor:** ${idea.anchor}`,
+    `**Cost:** ${idea.cost}`,
+    `**Scores:** Wert ${idea.wert}, Umsetzbarkeit ${idea.umsetzbarkeit}, Systemfit ${idea.systemfit}`,
+    `**Verdict:** ${idea.verdict}`,
+    idea.risk ? `**Risk:** ${idea.risk}` : "**Risk:**",
+    "",
+    "### Hypothesis",
+    els.hypothesis.value.trim(),
+    "",
+    "### Test",
+    els.test.value.trim(),
+    "",
+    "### Success Criterion",
+    els.success.value.trim(),
+    "",
+    "### Rollback",
+    els.rollback.value.trim(),
+    ""
+  ].join("\n");
+}
+
+async function copyMarkdown() {
+  const md = markdownCard();
+  if (!md) {
+    els.copyStatus.textContent = "nothing to copy";
+    els.copyStatus.className = "status warn";
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(md);
+    els.copyStatus.textContent = "copied";
+    els.copyStatus.className = "status ok";
+  } catch (error) {
+    els.copyStatus.textContent = "copy failed";
+    els.copyStatus.className = "status bad";
+  }
+}
+
+function parseNow() {
+  state.ideas = parseOutput(els.raw.value);
+  state.manualIndex = null;
+  resetExperimentEdits();
+  if (state.ideas.length === 0) {
+    els.parseStatus.textContent = "0 ideas";
+    els.parseStatus.className = "status warn";
+  } else {
+    els.parseStatus.textContent = `${state.ideas.length} ideas`;
+    els.parseStatus.className = "status ok";
+  }
+  updateRecommendation();
+}
+
+function resetAll() {
+  state.ideas = [];
+  state.selectedIndex = null;
+  state.manualIndex = null;
+  els.topic.value = "";
+  els.intent.value = "unknown";
+  els.mode.value = "single";
+  els.raw.value = "";
+  els.parseStatus.textContent = "idle";
+  els.parseStatus.className = "status";
+  els.copyStatus.textContent = "not copied";
+  els.copyStatus.className = "status";
+  resetExperimentEdits();
+  updateRecommendation();
+}
+
+els.parse.addEventListener("click", parseNow);
+els.reset.addEventListener("click", resetAll);
+els.copy.addEventListener("click", copyMarkdown);
+
+els.board.addEventListener("change", event => {
+  const target = event.target;
+  const index = Number(target.dataset.index);
+  const key = target.dataset.key;
+  if (!Number.isInteger(index) || !key || !state.ideas[index]) return;
+  const value = ["wert", "umsetzbarkeit", "systemfit"].includes(key)
+    ? Number(target.value)
+    : target.value;
+  state.ideas[index][key] = value;
+  if (key !== "risk") resetExperimentEdits();
+  updateRecommendation();
+});
+
+els.board.addEventListener("input", event => {
+  const target = event.target;
+  const index = Number(target.dataset.index);
+  const key = target.dataset.key;
+  if (!Number.isInteger(index) || key !== "risk" || !state.ideas[index]) return;
+  state.ideas[index].risk = target.value;
+});
+
+els.board.addEventListener("click", event => {
+  const select = event.target.closest("[data-select]");
+  const clear = event.target.closest("[data-clear]");
+  if (select) {
+    state.manualIndex = Number(select.dataset.select);
+    resetExperimentEdits();
+    updateRecommendation();
+  }
+  if (clear) {
+    const index = Number(clear.dataset.clear);
+    if (state.manualIndex === index) state.manualIndex = null;
+    state.ideas[index].wert = 0;
+    state.ideas[index].umsetzbarkeit = 0;
+    state.ideas[index].systemfit = 0;
+    state.ideas[index].risk = "";
+    state.ideas[index].verdict = "backlog";
+    resetExperimentEdits();
+    updateRecommendation();
+  }
+});
+
+[els.hypothesis, els.test, els.success, els.rollback].forEach(el => {
+  el.addEventListener("input", () => {
+    el.dataset.userEdited = "true";
+  });
+});
+
+updateRecommendation();
+</script>
+</body>
+</html>
